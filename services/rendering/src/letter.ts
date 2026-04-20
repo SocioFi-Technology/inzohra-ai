@@ -138,6 +138,75 @@ export interface LetterBundle {
 // DB helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Build a map from raw sheet_id keys (stored in findings.sheet_reference) to
+ * human-readable sheet labels for display in the letter.
+ *
+ * Findings store sheet_id as "<doc_uuid>:p<page>" (e.g. "d2150009-...:p017").
+ * The sheets table has sheet_number / canonical_id columns (populated by Phase 01
+ * SheetIdentifierParser) and title_block entities with a sheet_title field.
+ *
+ * Fallback chain per page:
+ *   canonical_id (e.g. "A-1.2") → sheet_number → "<title> (p<N>)" → "Sheet <N>"
+ */
+async function buildSheetLabelMap(
+  client: Client,
+  projectId: string,
+): Promise<Map<string, string>> {
+  const res = await client.query<{
+    document_id: string;
+    page: number;
+    sheet_number: string | null;
+    canonical_id: string | null;
+    canonical_title: string | null;
+    tb_payload: Record<string, unknown> | null;
+  }>(
+    `SELECT s.document_id, s.page,
+            s.sheet_number, s.canonical_id, s.canonical_title,
+            e.payload AS tb_payload
+     FROM sheets s
+     LEFT JOIN entities e
+            ON e.sheet_id = s.sheet_id AND e.type = 'title_block'
+     WHERE s.project_id = $1`,
+    [projectId],
+  );
+
+  const map = new Map<string, string>();
+
+  for (const row of res.rows) {
+    const rawKey = `${row.document_id}:p${String(row.page).padStart(3, "0")}`;
+
+    // Determine the best human-readable label.
+    let label: string;
+    if (row.canonical_id) {
+      label = row.canonical_id;                    // e.g. "A-1.2"
+    } else if (row.sheet_number) {
+      label = row.sheet_number;                    // e.g. "A-1"
+    } else {
+      // Extract sheet_title from title_block payload if available.
+      let sheetTitle = "";
+      if (row.tb_payload) {
+        const raw = row.tb_payload["sheet_title"];
+        if (typeof raw === "string") sheetTitle = raw;
+        else if (raw && typeof raw === "object" && "value" in raw) {
+          sheetTitle = String((raw as Record<string, unknown>)["value"] ?? "");
+        }
+        // Ignore generic titles that add no information.
+        if (["title", "title sheet", ""].includes(sheetTitle.toLowerCase())) {
+          sheetTitle = "";
+        }
+      }
+      label = sheetTitle
+        ? `${sheetTitle} (p${row.page})`
+        : `${row.page}`;
+    }
+
+    map.set(rawKey, label);
+  }
+
+  return map;
+}
+
 async function fetchProject(client: Client, projectId: string): Promise<ProjectRow> {
   const res = await client.query<ProjectRow>(
     `SELECT project_id, permit_number, jurisdiction,
@@ -225,8 +294,26 @@ export function buildJsonBundle(
   submittal: SubmittalRow,
   findings: FindingRow[],
   currentRound: number,
+  sheetLabelMap: Map<string, string> = new Map(),
 ): LetterBundle {
   const tmpl = BV_SANTA_ROSA_TEMPLATE;
+
+  // Helper: resolve raw sheet_id to a human-readable label.
+  const resolveSheetLabel = (sheetId: string): string => {
+    if (!sheetId || sheetId === "") return "";
+    // Direct lookup (exact key match).
+    if (sheetLabelMap.has(sheetId)) return sheetLabelMap.get(sheetId)!;
+    // The page suffix may be stored without leading zeros in some findings.
+    // Try normalising: "d2150009-...:p17" → "d2150009-...:p017"
+    const match = sheetId.match(/^(.+):p(\d+)$/);
+    if (match) {
+      const normalised = `${match[1]}:p${match[2].padStart(3, "0")}`;
+      if (sheetLabelMap.has(normalised)) return sheetLabelMap.get(normalised)!;
+      // Final fallback: just show the page number.
+      return `${parseInt(match[2], 10)}`;
+    }
+    return sheetId; // Return as-is if format is unrecognised.
+  };
 
   // Apply round styles (finding-id → typography)
   const styles = applyRoundStyles(findings, currentRound);
@@ -241,7 +328,22 @@ export function buildJsonBundle(
     for (const f of group) {
       commentNumber += 1;
       const typography = styleMap.get(f.finding_id) ?? "normal";
-      const displayText = f.polished_text ?? f.draft_comment_text;
+      const rawText = f.polished_text ?? f.draft_comment_text;
+      const sheetLabel = resolveSheetLabel(f.sheet_reference?.sheet_id ?? "");
+      // If the raw text already starts with "Sheet <raw_uuid>" replace it with
+      // the human-readable label; otherwise prepend the label.
+      let displayText = rawText;
+      if (sheetLabel) {
+        // Replace leading "Sheet <internal-id>:" if present.
+        displayText = rawText.replace(
+          /^Sheet [a-f0-9-]+:[p\d]+:\s*/i,
+          `Sheet ${sheetLabel}: `,
+        );
+        // If no replacement happened and text doesn't start with "Sheet", prepend.
+        if (displayText === rawText && !/^Sheet /i.test(rawText)) {
+          displayText = `Sheet ${sheetLabel}: ${rawText}`;
+        }
+      }
       orderedFindings.push({
         ...f,
         comment_number: commentNumber,
@@ -258,10 +360,22 @@ export function buildJsonBundle(
   for (const f of unordered) {
     commentNumber += 1;
     const typography = styleMap.get(f.finding_id) ?? "normal";
+    const rawText2 = f.polished_text ?? f.draft_comment_text;
+    const sheetLabel2 = resolveSheetLabel(f.sheet_reference?.sheet_id ?? "");
+    let displayText2 = rawText2;
+    if (sheetLabel2) {
+      displayText2 = rawText2.replace(
+        /^Sheet [a-f0-9-]+:[p\d]+:\s*/i,
+        `Sheet ${sheetLabel2}: `,
+      );
+      if (displayText2 === rawText2 && !/^Sheet /i.test(rawText2)) {
+        displayText2 = `Sheet ${sheetLabel2}: ${rawText2}`;
+      }
+    }
     orderedFindings.push({
       ...f,
       comment_number: commentNumber,
-      display_text: f.polished_text ?? f.draft_comment_text,
+      display_text: displayText2,
       typography,
     });
   }
@@ -721,8 +835,9 @@ export async function assembleLetter(projectId: string, round = 1): Promise<void
     const project = await fetchProject(client, projectId);
     const submittal = await fetchSubmittal(client, projectId);
     const findings = await fetchFindings(client, projectId, round);
+    const sheetLabelMap = await buildSheetLabelMap(client, projectId);
 
-    const bundle = buildJsonBundle(project, submittal, findings, round);
+    const bundle = buildJsonBundle(project, submittal, findings, round, sheetLabelMap);
 
     // Ensure output directory exists
     const outDir = path.resolve(process.cwd(), "inzohra-output");
