@@ -3,22 +3,25 @@ import { Pool } from "pg";
 
 const db = new Pool({ connectionString: process.env.DATABASE_URL! });
 
-// Complete rule-to-BV map covering all phases
+// Complete rule-to-BV map covering all phases.
+// Keep in sync with RULE_TO_BV_COMMENT in services/review/app/comparison/compare.py.
 const RULE_TO_BV: Record<string, number[]> = {
   // Plan integrity
   "PI-STAMP-001": [4],
   "PI-INDEX-003": [1],
   // Architectural
-  "AR-EGRESS-WIN-001": [2], "AR-WIN-NCO-001": [2],
+  "AR-EGRESS-WIN-001": [2], "AR-WIN-NCO-001": [2], "AR-WIN-HEIGHT-001": [2],
+  "AR-WIN-WIDTH-001": [2], "AR-WIN-SILL-001": [2],
   "AR-CODE-ANALYSIS-001": [10], "AR-SHOWER-001": [12], "AR-RESTROOM-001": [13],
   "AR-EXIT-SEP-001": [14], "AR-TRAVEL-001": [15], "AR-EXIT-DISC-001": [16],
   "AR-SMOKE-001": [17],
   // Accessibility
-  "AC-TRIGGER-001": [22], "AC-PATH-001": [27], "AC-DOOR-WIDTH-001": [38],
-  "AC-TURN-001": [29], "AC-KITCHEN-001": [28, 30, 31],
-  "AC-TOILET-001": [32, 38], "AC-TP-DISP-001": [40],
-  "AC-GRAB-001": [35, 36], "AC-REACH-001": [33, 34, 37],
-  "AC-SIGN-001": [42], "AC-PARKING-001": [25],
+  "AC-TRIGGER-001": [22], "AC-PATH-001": [27, 28], "AC-DOOR-WIDTH-001": [31, 38],
+  "AC-TURN-001": [29, 34], "AC-KITCHEN-001": [28, 29, 30, 31],
+  "AC-TOILET-001": [31, 32, 38], "AC-TP-DISP-001": [40],
+  "AC-GRAB-001": [35, 36], "AC-REACH-001": [33, 37, 38],
+  "AC-SIGN-001": [42], "AC-PARKING-001": [25, 26],
+  "AC-SURFACE-001": [27, 41], "AC-HTG-001": [30],
   // Energy
   "EN-MIXED-OCC-T24-001": [43], "EN-DECL-SIGNED-001": [44], "EN-WALL-INSUL-001": [56],
   // Electrical
@@ -37,6 +40,21 @@ const RULE_TO_BV: Record<string, number[]> = {
   "FIRE-SEP-RATING-508": [5, 6], "FIRE-FIRE-DOOR-001": [7],
   "FIRE-HSC13131-TYPE-V": [3], "FIRE-DEFERRED-SUB-001": [2],
 };
+
+// Rules that fire on correct general-practice findings not individually cited in
+// the BV letter. These are NOT false positives. Exclude them from the FP display.
+// Keep in sync with ACCEPTED_GENERAL_RULES in services/review/app/comparison/compare.py.
+const ACCEPTED_GENERAL_RULES = new Set<string>([
+  "PI-DATE-001", "PI-TITLE-001", "PI-PERMIT-001", "PI-NORTH-001", "PI-SCALE-001",
+  "STR-SHEAR-CALLOUT-001", "STR-HOLDOWN-001", "STR-FASTENER-001", "STR-LOAD-PATH-001",
+  "PLMB-BACKFLOW-001", "PLMB-WH-ELEVATION-001",
+  "MECH-DUCT-INSUL-001",
+  "ELEC-GFCI-001", "ELEC-AFCI-001", "ELEC-ACCESSIBLE-CTRL-001",
+  "CALG-WATER-FIXTURES-001", "CALG-RECYCLE-001", "CALG-EV-READY-001",
+  "CALG-INDOOR-AIR-001", "CALG-MANDATORY-NOTE-001",
+  "EN-CLIMATE-ZONE-001", "EN-HERS-DECL-001", "EN-PRESCRIPTIVE-001",
+  "FIRE-CO-ALARM-001",
+]);
 
 interface FindingRow {
   finding_id: string;
@@ -80,6 +98,7 @@ export async function GET(
       ),
     ]);
 
+    // De-duplicate by comment_number (DB may have duplicate rows for same comment)
     const bvByNum = new Map(
       bvRes.rows.map((r) => [r.comment_number, r.comment_text])
     );
@@ -96,18 +115,20 @@ export async function GET(
       }
     }
 
-    // Misses: BV comments not matched by any finding
-    const misses = bvRes.rows
-      .filter((r) => !matchedBvNums.has(r.comment_number))
-      .map((r) => ({
-        comment_number: r.comment_number,
-        comment_text: r.comment_text,
+    // Misses: unique BV comments not matched by any finding
+    const misses = Array.from(bvByNum.entries())
+      .filter(([num]) => !matchedBvNums.has(num))
+      .map(([num, text]) => ({
+        comment_number: num,
+        comment_text: text,
         triage_actions: [...TRIAGE_ACTIONS],
-      }));
+      }))
+      .sort((a, b) => a.comment_number - b.comment_number);
 
-    // False positives: findings not matched to any BV comment
+    // True false positives: findings not matched to any BV comment AND not in
+    // ACCEPTED_GENERAL_RULES (those are extra-value findings, not FPs).
     const falsePositives = findingsRes.rows
-      .filter((f) => !matchedFindingIds.has(f.finding_id))
+      .filter((f) => !matchedFindingIds.has(f.finding_id) && !ACCEPTED_GENERAL_RULES.has(f.rule_id))
       .map((f) => ({
         finding_id: f.finding_id,
         rule_id: f.rule_id,
@@ -118,13 +139,18 @@ export async function GET(
         triage_actions: [...TRIAGE_ACTIONS],
       }));
 
+    const acceptedGeneralCount = findingsRes.rows.filter(
+      (f) => !matchedFindingIds.has(f.finding_id) && ACCEPTED_GENERAL_RULES.has(f.rule_id)
+    ).length;
+
     return NextResponse.json({
       project_id: projectId,
       review_round: round,
-      total_bv_comments: bvRes.rows.length,
+      total_bv_comments: bvByNum.size,   // unique comment count
       total_findings: findingsRes.rows.length,
       matched_bv_comments: matchedBvNums.size,
       matched_findings: matchedFindingIds.size,
+      accepted_general_count: acceptedGeneralCount,
       miss_count: misses.length,
       false_positive_count: falsePositives.length,
       misses,

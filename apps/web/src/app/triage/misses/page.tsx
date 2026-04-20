@@ -2,22 +2,25 @@ import { Pool } from "pg";
 
 const db = new Pool({ connectionString: process.env.DATABASE_URL! });
 
-// Complete rule-to-BV map covering all phases
+// Complete rule-to-BV map covering all phases.
+// Keep in sync with RULE_TO_BV_COMMENT in services/review/app/comparison/compare.py.
 const RULE_TO_BV: Record<string, number[]> = {
   // Plan integrity
   "PI-STAMP-001": [4],
   "PI-INDEX-003": [1],
   // Architectural
-  "AR-EGRESS-WIN-001": [2], "AR-WIN-NCO-001": [2],
+  "AR-EGRESS-WIN-001": [2], "AR-WIN-NCO-001": [2], "AR-WIN-HEIGHT-001": [2],
+  "AR-WIN-WIDTH-001": [2], "AR-WIN-SILL-001": [2],
   "AR-CODE-ANALYSIS-001": [10], "AR-SHOWER-001": [12], "AR-RESTROOM-001": [13],
   "AR-EXIT-SEP-001": [14], "AR-TRAVEL-001": [15], "AR-EXIT-DISC-001": [16],
   "AR-SMOKE-001": [17],
   // Accessibility
-  "AC-TRIGGER-001": [22], "AC-PATH-001": [27], "AC-DOOR-WIDTH-001": [38],
-  "AC-TURN-001": [29], "AC-KITCHEN-001": [28, 30, 31],
-  "AC-TOILET-001": [32, 38], "AC-TP-DISP-001": [40],
-  "AC-GRAB-001": [35, 36], "AC-REACH-001": [33, 34, 37],
-  "AC-SIGN-001": [42], "AC-PARKING-001": [25],
+  "AC-TRIGGER-001": [22], "AC-PATH-001": [27, 28], "AC-DOOR-WIDTH-001": [31, 38],
+  "AC-TURN-001": [29, 34], "AC-KITCHEN-001": [28, 29, 30, 31],
+  "AC-TOILET-001": [31, 32, 38], "AC-TP-DISP-001": [40],
+  "AC-GRAB-001": [35, 36], "AC-REACH-001": [33, 37, 38],
+  "AC-SIGN-001": [42], "AC-PARKING-001": [25, 26],
+  "AC-SURFACE-001": [27, 41], "AC-HTG-001": [30],
   // Energy
   "EN-MIXED-OCC-T24-001": [43], "EN-DECL-SIGNED-001": [44], "EN-WALL-INSUL-001": [56],
   // Electrical
@@ -89,19 +92,27 @@ export default async function TriageMissesPage({
     ),
   ]);
 
+  // De-duplicate by comment_number (DB may have duplicate rows for same comment)
+  const bvByNum = new Map(bvRes.rows.map((r) => [r.comment_number, r.comment_text]));
+
   const matchedBvNums = new Set<number>();
   for (const f of findingsRes.rows) {
     const mapped = RULE_TO_BV[f.rule_id] ?? [];
-    for (const n of mapped) matchedBvNums.add(n);
+    for (const n of mapped) {
+      if (bvByNum.has(n)) matchedBvNums.add(n);
+    }
   }
 
-  const misses = bvRes.rows.filter((r) => !matchedBvNums.has(r.comment_number));
+  const misses = Array.from(bvByNum.entries())
+    .filter(([num]) => !matchedBvNums.has(num))
+    .map(([num, text]) => ({ comment_number: num, comment_text: text }))
+    .sort((a, b) => a.comment_number - b.comment_number);
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-2">Triage — Missed BV Comments</h1>
       <p className="text-gray-500 mb-6">
-        {misses.length} of {bvRes.rows.length} BV comments not matched by any
+        {misses.length} of {bvByNum.size} unique BV comments not matched by any
         finding (round {round}).
       </p>
       {misses.length === 0 ? (

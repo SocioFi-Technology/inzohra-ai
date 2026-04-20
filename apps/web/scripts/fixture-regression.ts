@@ -478,22 +478,38 @@ async function runPhase05(): Promise<boolean> {
   console.log(`  [${hPass ? "PASS" : "FAIL"}] [h] Code KB sections: ${kbCount} (need ≥70)`);
   if (!hPass) passed = false;
 
-  // [i] Miss count — compute inline using the same rule_to_bv map
+  // [i] Miss count — compute inline using the same rule_to_bv map as compare.py
+  // Keep in sync with RULE_TO_BV_COMMENT in services/review/app/comparison/compare.py
   const ruleMap: Record<string, number[]> = {
+    // Plan integrity
     "PI-STAMP-001": [4], "PI-INDEX-003": [1],
-    "AR-EGRESS-WIN-001": [2], "AR-CODE-ANALYSIS-001": [10], "AR-SHOWER-001": [12],
-    "AR-RESTROOM-001": [13], "AR-EXIT-SEP-001": [14], "AR-TRAVEL-001": [15],
-    "AR-EXIT-DISC-001": [16], "AR-SMOKE-001": [17],
-    "AC-TRIGGER-001": [22], "AC-PATH-001": [27], "AC-TURN-001": [29],
-    "AC-KITCHEN-001": [28], "AC-TOILET-001": [32], "AC-TP-DISP-001": [40],
-    "AC-GRAB-001": [35], "AC-REACH-001": [33], "AC-SIGN-001": [42], "AC-PARKING-001": [25],
+    // Architectural
+    "AR-EGRESS-WIN-001": [2], "AR-WIN-NCO-001": [2], "AR-WIN-HEIGHT-001": [2],
+    "AR-WIN-WIDTH-001": [2], "AR-WIN-SILL-001": [2],
+    "AR-CODE-ANALYSIS-001": [10], "AR-SHOWER-001": [12], "AR-RESTROOM-001": [13],
+    "AR-EXIT-SEP-001": [14], "AR-TRAVEL-001": [15], "AR-EXIT-DISC-001": [16],
+    "AR-SMOKE-001": [17],
+    // Accessibility
+    "AC-TRIGGER-001": [22], "AC-PATH-001": [27, 28], "AC-DOOR-WIDTH-001": [31, 38],
+    "AC-TURN-001": [29, 34], "AC-KITCHEN-001": [28, 29, 30, 31],
+    "AC-TOILET-001": [31, 32, 38], "AC-TP-DISP-001": [40],
+    "AC-GRAB-001": [35, 36], "AC-REACH-001": [33, 37, 38],
+    "AC-SIGN-001": [42], "AC-PARKING-001": [25, 26],
+    "AC-SURFACE-001": [27, 41], "AC-HTG-001": [30],
+    // Energy
     "EN-MIXED-OCC-T24-001": [43], "EN-DECL-SIGNED-001": [44], "EN-WALL-INSUL-001": [56],
-    "ELEC-PANEL-LOC-001": [45], "ELEC-R21-COMPLIANCE-001": [46], "ELEC-EXT-LIGHTING-001": [47],
-    "MECH-ATTIC-VENT-001": [19], "MECH-HVAC-DEDICATED": [48],
-    "MECH-BATH-EXHAUST-001": [49], "MECH-KITCHEN-HOOD-001": [50],
+    // Electrical
+    "ELEC-PANEL-LOC-001": [45], "ELEC-PANEL-AMP-001": [45],
+    "ELEC-R21-COMPLIANCE-001": [46], "ELEC-EXT-LIGHTING-001": [47],
+    // Mechanical
+    "MECH-ATTIC-VENT-001": [19], "MECH-ATTIC-SCREEN-001": [20], "MECH-ATTIC-CLEAR-001": [21],
+    "MECH-HVAC-DEDICATED": [48], "MECH-BATH-EXHAUST-001": [49], "MECH-KITCHEN-HOOD-001": [50],
+    // Plumbing
     "PLMB-UTILITY-SITE-001": [51], "PLMB-FIXTURE-COUNT-001": [52],
     "PLMB-WH-LOCATION-001": [53], "PLMB-SHOWER-CTRL-001": [54], "PLMB-WH-DEDICATED-001": [55],
+    // Structural
     "STR-HEADER-SIZING": [57], "STR-PLUMB-WALL-STUDS": [58],
+    // Fire/Life Safety
     "FIRE-NFPA13R-REQUIRED": [2, 4], "FIRE-ALARM-REQUIRED": [5],
     "FIRE-SEP-RATING-508": [5, 6], "FIRE-FIRE-DOOR-001": [7],
     "FIRE-HSC13131-TYPE-V": [3], "FIRE-DEFERRED-SUB-001": [2],
@@ -504,20 +520,22 @@ async function runPhase05(): Promise<boolean> {
     [projectId]
   );
   const bvRes = await db.query(
-    `SELECT comment_number FROM external_review_comments WHERE project_id = $1`,
+    `SELECT DISTINCT comment_number FROM external_review_comments WHERE project_id = $1`,
     [projectId]
   );
+  // Use unique comment_number set as denominator (DB may have duplicate rows)
   const bvNums = new Set(bvRes.rows.map((r: { comment_number: number }) => r.comment_number));
   const matchedBv = new Set<number>();
   for (const f of findingsRes.rows) {
     const mapped = ruleMap[f.rule_id as string] ?? [];
     for (const n of mapped) { if (bvNums.has(n)) matchedBv.add(n); }
   }
-  const missCount = bvRes.rows.length - matchedBv.size;
+  const uniqueBvCount = bvNums.size;
+  const missCount = uniqueBvCount - matchedBv.size;
   const iPass = missCount <= 30;
   console.log(
-    `  [${iPass ? "PASS" : "UNCHECKED"}] [i] Miss count: ${missCount}/${bvRes.rows.length} ` +
-    `BV comments not matched (need ≤30)`
+    `  [${iPass ? "PASS" : "UNCHECKED"}] [i] Miss count: ${missCount}/${uniqueBvCount} ` +
+    `unique BV comments not matched (need ≤30)`
   );
 
   return passed;

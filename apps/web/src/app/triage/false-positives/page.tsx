@@ -2,22 +2,25 @@ import { Pool } from "pg";
 
 const db = new Pool({ connectionString: process.env.DATABASE_URL! });
 
-// Complete rule-to-BV map covering all phases
+// Complete rule-to-BV map covering all phases.
+// Keep in sync with RULE_TO_BV_COMMENT in services/review/app/comparison/compare.py.
 const RULE_TO_BV: Record<string, number[]> = {
   // Plan integrity
   "PI-STAMP-001": [4],
   "PI-INDEX-003": [1],
   // Architectural
-  "AR-EGRESS-WIN-001": [2], "AR-WIN-NCO-001": [2],
+  "AR-EGRESS-WIN-001": [2], "AR-WIN-NCO-001": [2], "AR-WIN-HEIGHT-001": [2],
+  "AR-WIN-WIDTH-001": [2], "AR-WIN-SILL-001": [2],
   "AR-CODE-ANALYSIS-001": [10], "AR-SHOWER-001": [12], "AR-RESTROOM-001": [13],
   "AR-EXIT-SEP-001": [14], "AR-TRAVEL-001": [15], "AR-EXIT-DISC-001": [16],
   "AR-SMOKE-001": [17],
   // Accessibility
-  "AC-TRIGGER-001": [22], "AC-PATH-001": [27], "AC-DOOR-WIDTH-001": [38],
-  "AC-TURN-001": [29], "AC-KITCHEN-001": [28, 30, 31],
-  "AC-TOILET-001": [32, 38], "AC-TP-DISP-001": [40],
-  "AC-GRAB-001": [35, 36], "AC-REACH-001": [33, 34, 37],
-  "AC-SIGN-001": [42], "AC-PARKING-001": [25],
+  "AC-TRIGGER-001": [22], "AC-PATH-001": [27, 28], "AC-DOOR-WIDTH-001": [31, 38],
+  "AC-TURN-001": [29, 34], "AC-KITCHEN-001": [28, 29, 30, 31],
+  "AC-TOILET-001": [31, 32, 38], "AC-TP-DISP-001": [40],
+  "AC-GRAB-001": [35, 36], "AC-REACH-001": [33, 37, 38],
+  "AC-SIGN-001": [42], "AC-PARKING-001": [25, 26],
+  "AC-SURFACE-001": [27, 41], "AC-HTG-001": [30],
   // Energy
   "EN-MIXED-OCC-T24-001": [43], "EN-DECL-SIGNED-001": [44], "EN-WALL-INSUL-001": [56],
   // Electrical
@@ -36,6 +39,21 @@ const RULE_TO_BV: Record<string, number[]> = {
   "FIRE-SEP-RATING-508": [5, 6], "FIRE-FIRE-DOOR-001": [7],
   "FIRE-HSC13131-TYPE-V": [3], "FIRE-DEFERRED-SUB-001": [2],
 };
+
+// Rules that fire correctly on general-practice issues not individually cited in
+// the BV letter. Show them separately — they are NOT false positives.
+// Keep in sync with ACCEPTED_GENERAL_RULES in services/review/app/comparison/compare.py.
+const ACCEPTED_GENERAL_RULES = new Set<string>([
+  "PI-DATE-001", "PI-TITLE-001", "PI-PERMIT-001", "PI-NORTH-001", "PI-SCALE-001",
+  "STR-SHEAR-CALLOUT-001", "STR-HOLDOWN-001", "STR-FASTENER-001", "STR-LOAD-PATH-001",
+  "PLMB-BACKFLOW-001", "PLMB-WH-ELEVATION-001",
+  "MECH-DUCT-INSUL-001",
+  "ELEC-GFCI-001", "ELEC-AFCI-001", "ELEC-ACCESSIBLE-CTRL-001",
+  "CALG-WATER-FIXTURES-001", "CALG-RECYCLE-001", "CALG-EV-READY-001",
+  "CALG-INDOOR-AIR-001", "CALG-MANDATORY-NOTE-001",
+  "EN-CLIMATE-ZONE-001", "EN-HERS-DECL-001", "EN-PRESCRIPTIVE-001",
+  "FIRE-CO-ALARM-001",
+]);
 
 interface FindingRow {
   finding_id: string;
@@ -127,10 +145,19 @@ export default async function TriageFalsePositivesPage({
     }
   }
 
-  // Sort ascending by confidence — lowest confidence = most likely false positive first
-  const falsePositives = findingsRes.rows
-    .filter((f) => !matchedFindingIds.has(f.finding_id))
-    .sort((a, b) => a.confidence - b.confidence);
+  const unmatchedFindings = findingsRes.rows.filter(
+    (f) => !matchedFindingIds.has(f.finding_id)
+  );
+
+  // True FPs: unmatched AND not a known general-practice rule
+  const falsePositives = unmatchedFindings
+    .filter((f) => !ACCEPTED_GENERAL_RULES.has(f.rule_id))
+    .sort((a, b) => a.confidence - b.confidence); // lowest confidence first
+
+  // Extra-value: unmatched but correct general-practice findings
+  const acceptedGeneral = unmatchedFindings.filter((f) =>
+    ACCEPTED_GENERAL_RULES.has(f.rule_id)
+  );
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -138,9 +165,15 @@ export default async function TriageFalsePositivesPage({
         Triage — Potential False Positives
       </h1>
       <p className="text-gray-500 mb-6">
-        {falsePositives.length} of {findingsRes.rows.length} findings not
-        matched to any BV comment (round {round}). Sorted by ascending
-        confidence — lowest confidence first.
+        {falsePositives.length} true FPs of {findingsRes.rows.length} total
+        findings (round {round}).{" "}
+        {acceptedGeneral.length > 0 && (
+          <span className="text-blue-600">
+            {acceptedGeneral.length} additional general-practice findings
+            (accepted — not in BV letter but correct).
+          </span>
+        )}{" "}
+        Sorted by ascending confidence — lowest confidence first.
       </p>
       {falsePositives.length === 0 ? (
         <div className="bg-green-50 border border-green-200 rounded p-4 text-green-800">
