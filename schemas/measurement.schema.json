@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://inzohra.ai/schemas/measurement.schema.json",
+  "title": "Measurement",
+  "description": "A derived measurement with its full derivation trace.",
+  "type": "object",
+  "required": ["measurement_id", "project_id", "sheet_id", "type", "value", "unit", "confidence", "trace", "extractor_version", "created_at"],
+  "properties": {
+    "measurement_id": { "type": "string", "format": "uuid" },
+    "project_id": { "type": "string", "format": "uuid" },
+    "sheet_id": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": ["distance", "area", "door_clear_width", "window_nco", "egress_travel_distance",
+               "exit_separation", "accessible_route_width", "turning_space_diameter",
+               "stair_rise", "stair_run", "ramp_slope", "room_area", "ceiling_height"]
+    },
+    "value": { "type": "number" },
+    "unit": { "type": "string" },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "trace": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sublayer", "value", "confidence"],
+        "properties": {
+          "sublayer": { "type": "string" },
+          "value": {},
+          "confidence": { "type": "number" },
+          "bbox": { "type": ["array", "null"] },
+          "source_entity_id": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "override_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["reviewer_id", "timestamp", "old_value", "new_value"],
+        "properties": {
+          "reviewer_id": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "old_value": { "type": "number" },
+          "new_value": { "type": "number" },
+          "rationale": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "extractor_version": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

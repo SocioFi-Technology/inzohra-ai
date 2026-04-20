@@ -1,0 +1,82 @@
+# Inzohra-ai local development stack.
+# Boot with: docker compose up -d postgres redis minio
+# Health:    docker compose ps
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: inzohra-postgres
+    environment:
+      POSTGRES_USER: inzohra
+      POSTGRES_PASSWORD: inzohra_dev
+      POSTGRES_DB: inzohra
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inzohra -d inzohra"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: inzohra-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: inzohra-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: inzohra_dev
+      MINIO_ROOT_PASSWORD: inzohra_dev_secret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio-setup:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 inzohra_dev inzohra_dev_secret;
+      mc mb -p local/inzohra-raw local/inzohra-raster local/inzohra-crops local/inzohra-output;
+      exit 0;
+      "
+
+  traefik:
+    image: traefik:v3.0
+    container_name: inzohra-traefik
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

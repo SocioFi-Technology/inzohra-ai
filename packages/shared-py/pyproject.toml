@@ -1,0 +1,12 @@
+[project]
+name = "inzohra-shared"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2.6.0", "anthropic>=0.30.0", "httpx>=0.27.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["inzohra_shared"]

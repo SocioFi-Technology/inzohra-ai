@@ -1,0 +1,40 @@
+{
+  "project": "inzohra-ai",
+  "description": "Automated reviewer & commenter agent for building-permit plan review. Multi-agent, retrieval-grounded, code-cited.",
+  "revision": "DOC-ARCH-002 · REV 0.1",
+  "fixture": "fixtures/2008-dennis-ln/",
+  "code_cycle": "2022 California Building Standards",
+  "default_jurisdiction": "santa_rosa",
+  "mustReadOnStart": [
+    "CLAUDE.md",
+    "docs/17-invariants-and-risks.md",
+    ".claude/skills-registry.md",
+    ".claude/house-rules.md"
+  ],
+  "conventions": {
+    "python": { "version": "3.11", "env": "uv", "lint": "ruff", "types": "mypy --strict", "schema": "pydantic v2" },
+    "typescript": { "strict": true, "runtime_validation": "zod" },
+    "sql": { "migrations": "db/migrations/", "idempotent": true, "append_only": true },
+    "llm": { "temperature": 0, "provider": "anthropic", "default_model": "claude-sonnet-4-20250514", "high_stakes_model": "claude-opus-4", "classifier_model": "claude-haiku-4-5-20251001" }
+  },
+  "forbidden": [
+    "paraphrasing code text from model weights",
+    "mutating a record in place after commit",
+    "emitting a finding without provenance",
+    "retrieving code without (jurisdiction, effective_date)",
+    "auto-approving a requires_licensed_review finding"
+  ],
+  "phaseGates": [
+    "Phase 00 — dev stack green, fixture ingested, title blocks extracted",
+    "Phase 01 — sheet index reconciled, PlanIntegrity emits BV comments 1, 4, 8, 9, 18, 24",
+    "Phase 02 — schedules parsed, R-value mismatch flagged, BV letter parsed to 58 comments",
+    "Phase 03 — measurements with confidence intervals and derivation traces",
+    "Phase 04 — Architectural + Accessibility reviewers, first precision/recall numbers",
+    "Phase 05 — MEP + Structural + Energy + Fire + CalGreen, 58/58 BV comments covered",
+    "Phase 06 — PDF/DOCX letter indistinguishable from BV-authored at a glance",
+    "Phase 07 — learning loop live, triage queues populated",
+    "Phase 08 — second jurisdiction pack, amendments correctly applied",
+    "Phase 09 — measurement v2 + Question-Checklist agent live in designer portal",
+    "Finalize — production deploy + runbook + on-call rotation"
+  ]
+}

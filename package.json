@@ -1,0 +1,21 @@
+{
+  "name": "inzohra-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @inzohra/web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "db:migrate": "bash db/scripts/migrate.sh",
+    "db:shell": "psql $DATABASE_URL",
+    "kb:seed": "pnpm --filter @inzohra/web run kb:seed",
+    "letter:render": "pnpm --filter @inzohra/rendering run render",
+    "test:fixture": "pnpm --filter @inzohra/web run fixture"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

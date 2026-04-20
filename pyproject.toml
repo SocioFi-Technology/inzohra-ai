@@ -1,0 +1,28 @@
+[project]
+name = "inzohra-ai"
+version = "0.1.0"
+description = "Multi-agent retrieval-grounded plan-review system for California building permits."
+requires-python = ">=3.11"
+
+[tool.uv.workspace]
+members = [
+    "services/ingestion",
+    "services/measurement",
+    "services/review",
+    "packages/shared-py",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

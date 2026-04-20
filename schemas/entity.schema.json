@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://inzohra.ai/schemas/entity.schema.json",
+  "title": "Entity",
+  "description": "An extracted unit of structured data from a sheet or document.",
+  "type": "object",
+  "required": ["entity_id", "project_id", "document_id", "type", "payload", "bbox", "page", "extractor_version", "confidence", "created_at"],
+  "properties": {
+    "entity_id": { "type": "string", "format": "uuid" },
+    "project_id": { "type": "string", "format": "uuid" },
+    "document_id": { "type": "string", "format": "uuid" },
+    "sheet_id": { "type": ["string", "null"] },
+    "type": {
+      "type": "string",
+      "enum": ["title_block", "sheet_identifier", "sheet_index", "room", "door", "window",
+               "wall", "stair", "ramp", "dimension", "code_note", "fixture",
+               "schedule_row", "shear_wall_callout", "holdown", "detail_bubble",
+               "t24_envelope_row", "t24_hvac_row", "t24_dhw_row", "t24_header",
+               "external_review_comment", "revision_cloud", "question_checklist_query"]
+    },
+    "payload": { "type": "object" },
+    "bbox": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
+    "page": { "type": "integer", "minimum": 1 },
+    "extractor_version": { "type": "string" },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "source_track": { "type": "string", "enum": ["text", "vision", "merged"] },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

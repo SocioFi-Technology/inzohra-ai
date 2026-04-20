@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://inzohra.ai/schemas/letter-bundle.schema.json",
+  "title": "LetterBundle",
+  "description": "JSON bundle of a generated comment letter for downstream integration.",
+  "type": "object",
+  "required": ["project_id", "submittal_id", "review_round", "jurisdiction", "generated_at", "letterhead", "project_block", "findings"],
+  "properties": {
+    "project_id": { "type": "string", "format": "uuid" },
+    "submittal_id": { "type": "string", "format": "uuid" },
+    "review_round": { "type": "integer", "minimum": 1 },
+    "jurisdiction": { "type": "string" },
+    "pack_version": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "letterhead": { "type": "object" },
+    "project_block": { "type": "object" },
+    "general_instructions": { "type": "string" },
+    "signature_block": { "type": "object" },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "https://inzohra.ai/schemas/finding.schema.json" }
+    },
+    "round_typography": {
+      "type": "object",
+      "required": ["round_1", "round_2", "round_3"],
+      "properties": {
+        "round_1": { "type": "string", "enum": ["italic"] },
+        "round_2": { "type": "string", "enum": ["bold"] },
+        "round_3": { "type": "string", "enum": ["underlined"] }
+      }
+    }
+  }
+}
