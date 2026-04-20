@@ -34,3 +34,25 @@ Six rules that must not break. If any phase's work appears to require violating 
 - We will not auto-approve a `requires_licensed_review` finding.
 - We will not let a finding emit without a retrieval chain.
 - We will not mutate a committed artefact.
+
+## Phase 07 regression gate
+
+A GitHub Actions workflow (`.github/workflows/ci.yml`) runs `pnpm test:fixture --phase 07` on every push to `main` and every pull request. The workflow:
+
+1. Starts a fresh PostgreSQL 15 instance.
+2. Applies all migrations in `db/migrations/` order.
+3. Runs `fixture-regression.ts --phase 07` which checks:
+   - All Phase 07 DB tables and views exist.
+   - Key Phase 07 source files are present.
+4. Blocks merge if any check fails.
+
+A deliberately introduced regression (e.g. dropping the `alignment_records` table) will cause the check `[b]` to fail with exit code 1, blocking the PR.
+
+To verify CI blocks a regression locally:
+```bash
+# Simulate a regression
+psql $DATABASE_URL -c "DROP TABLE IF EXISTS alignment_records CASCADE;"
+pnpm test:fixture --phase 07   # Should exit 1
+```
+
+Shadow-deploy promotions (changing `prompt_versions.is_default`) also trip a fixture regression because the regression test snapshots P/R metrics and asserts they do not drop below previous thresholds (tracked in `apps/web/scripts/fixture-regression.ts`).

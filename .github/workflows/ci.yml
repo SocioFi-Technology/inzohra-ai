@@ -1,0 +1,64 @@
+name: Fixture Regression
+
+on:
+  push:
+    branches: [main, "phase/*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: inzohra
+          POSTGRES_PASSWORD: inzohra_dev
+          POSTGRES_DB: inzohra
+        ports:
+          - 5436:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://inzohra:inzohra_dev@localhost:5436/inzohra
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply DB migrations
+        run: |
+          python3 -c "
+          import psycopg, os, glob
+          conn = psycopg.connect(os.environ['DATABASE_URL'])
+          for f in sorted(glob.glob('db/migrations/*.sql')):
+              print(f'Applying {f}')
+              conn.execute(open(f).read())
+          conn.commit()
+          conn.close()
+          "
+
+      - name: Run Phase 07 fixture regression
+        run: pnpm --filter @inzohra/web run fixture -- 07
+
+      - name: Run all phases regression
+        run: pnpm --filter @inzohra/web run fixture -- all
+        continue-on-error: true  # Non-blocking for phases that need live data

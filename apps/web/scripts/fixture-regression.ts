@@ -680,6 +680,141 @@ async function runPhase06(): Promise<boolean> {
   return passed;
 }
 
+/**
+ * Phase 07 acceptance criteria (learning loop):
+ *   [a] `external_review_comments` table exists.
+ *   [b] `alignment_records` table exists.
+ *   [c] `reviewer_edits` table exists.
+ *   [d] `prompt_versions` table exists.
+ *   [e] `shadow_runs` table exists.
+ *   [f] `rule_metrics_live` view exists.
+ *   [g] ≥1 external_review_comment row for the B25-2734 fixture project
+ *       (soft check — warns but does not fail; requires run_comparison.py first).
+ *   [h] `/metrics` page source file exists.
+ *   [i] `/triage/edits` page source file exists.
+ *   [j] `/triage/overrides` page source file exists.
+ *   [k] `scripts/run_comparison.py` file exists.
+ *   [l] `services/review/app/comparison/alignment.py` file exists.
+ *   [m] `services/review/app/shadow/shadow.py` file exists.
+ */
+async function runPhase07(): Promise<boolean> {
+  let passed = true;
+
+  // Resolve repo root (two levels up from apps/web/scripts/)
+  const repoRoot = path.resolve(__dirname, "..", "..", "..", "..");
+
+  // [a] external_review_comments table exists
+  const ercRes = await db.query(
+    `SELECT to_regclass('public.external_review_comments') AS tbl`
+  );
+  const aPass = ercRes.rows[0].tbl !== null;
+  console.log(`  [${aPass ? "PASS" : "FAIL"}] [a] external_review_comments table exists`);
+  if (!aPass) passed = false;
+
+  // [b] alignment_records table exists
+  const arRes = await db.query(
+    `SELECT to_regclass('public.alignment_records') AS tbl`
+  );
+  const bPass = arRes.rows[0].tbl !== null;
+  console.log(`  [${bPass ? "PASS" : "FAIL"}] [b] alignment_records table exists`);
+  if (!bPass) passed = false;
+
+  // [c] reviewer_edits table exists
+  const reRes = await db.query(
+    `SELECT to_regclass('public.reviewer_edits') AS tbl`
+  );
+  const cPass = reRes.rows[0].tbl !== null;
+  console.log(`  [${cPass ? "PASS" : "FAIL"}] [c] reviewer_edits table exists`);
+  if (!cPass) passed = false;
+
+  // [d] prompt_versions table exists
+  const pvRes = await db.query(
+    `SELECT to_regclass('public.prompt_versions') AS tbl`
+  );
+  const dPass = pvRes.rows[0].tbl !== null;
+  console.log(`  [${dPass ? "PASS" : "FAIL"}] [d] prompt_versions table exists`);
+  if (!dPass) passed = false;
+
+  // [e] shadow_runs table exists
+  const srRes = await db.query(
+    `SELECT to_regclass('public.shadow_runs') AS tbl`
+  );
+  const ePass = srRes.rows[0].tbl !== null;
+  console.log(`  [${ePass ? "PASS" : "FAIL"}] [e] shadow_runs table exists`);
+  if (!ePass) passed = false;
+
+  // [f] rule_metrics_live view exists
+  const rmRes = await db.query(
+    `SELECT to_regclass('public.rule_metrics_live') AS tbl`
+  );
+  const fPass = rmRes.rows[0].tbl !== null;
+  console.log(`  [${fPass ? "PASS" : "FAIL"}] [f] rule_metrics_live view exists`);
+  if (!fPass) passed = false;
+
+  // [g] ≥1 external_review_comment row for the fixture project (SOFT — warns only)
+  const projRow = await db.query(
+    `SELECT project_id FROM projects WHERE permit_number = 'B25-2734' AND jurisdiction = 'santa_rosa' LIMIT 1`
+  );
+  if (projRow.rows.length === 0) {
+    console.log("  [UNCHECKED] [g] No B25-2734 project found — run ingest + run_comparison.py first.");
+  } else {
+    const projectId = projRow.rows[0].project_id as string;
+    if (!aPass) {
+      console.log("  [UNCHECKED] [g] external_review_comments table missing — skipping row check.");
+    } else {
+      const ercRowRes = await db.query(
+        `SELECT COUNT(*) AS cnt FROM external_review_comments WHERE project_id = $1`,
+        [projectId]
+      );
+      const ercRowCount = parseInt(ercRowRes.rows[0].cnt, 10);
+      const gPass = ercRowCount >= 1;
+      // Soft check: warn but do not fail — requires run_comparison.py to have been run
+      console.log(
+        `  [${gPass ? "PASS" : "UNCHECKED"}] [g] external_review_comments for B25-2734: ` +
+        `${ercRowCount} row(s) (need ≥1; run run_comparison.py if zero)`
+      );
+    }
+  }
+
+  // [h] /metrics page source file exists
+  const metricsPage = path.join(repoRoot, "apps", "web", "src", "app", "metrics", "page.tsx");
+  const hPass = fs.existsSync(metricsPage);
+  console.log(`  [${hPass ? "PASS" : "FAIL"}] [h] apps/web/src/app/metrics/page.tsx exists`);
+  if (!hPass) passed = false;
+
+  // [i] /triage/edits page source file exists
+  const triageEditsPage = path.join(repoRoot, "apps", "web", "src", "app", "triage", "edits", "page.tsx");
+  const iPass = fs.existsSync(triageEditsPage);
+  console.log(`  [${iPass ? "PASS" : "FAIL"}] [i] apps/web/src/app/triage/edits/page.tsx exists`);
+  if (!iPass) passed = false;
+
+  // [j] /triage/overrides page source file exists
+  const triageOverridesPage = path.join(repoRoot, "apps", "web", "src", "app", "triage", "overrides", "page.tsx");
+  const jPass = fs.existsSync(triageOverridesPage);
+  console.log(`  [${jPass ? "PASS" : "FAIL"}] [j] apps/web/src/app/triage/overrides/page.tsx exists`);
+  if (!jPass) passed = false;
+
+  // [k] scripts/run_comparison.py exists
+  const runComparisonPy = path.join(repoRoot, "scripts", "run_comparison.py");
+  const kPass = fs.existsSync(runComparisonPy);
+  console.log(`  [${kPass ? "PASS" : "FAIL"}] [k] scripts/run_comparison.py exists`);
+  if (!kPass) passed = false;
+
+  // [l] services/review/app/comparison/alignment.py exists
+  const alignmentPy = path.join(repoRoot, "services", "review", "app", "comparison", "alignment.py");
+  const lPass = fs.existsSync(alignmentPy);
+  console.log(`  [${lPass ? "PASS" : "FAIL"}] [l] services/review/app/comparison/alignment.py exists`);
+  if (!lPass) passed = false;
+
+  // [m] services/review/app/shadow/shadow.py exists
+  const shadowPy = path.join(repoRoot, "services", "review", "app", "shadow", "shadow.py");
+  const mPass = fs.existsSync(shadowPy);
+  console.log(`  [${mPass ? "PASS" : "FAIL"}] [m] services/review/app/shadow/shadow.py exists`);
+  if (!mPass) passed = false;
+
+  return passed;
+}
+
 (async () => {
   try {
     let ok = true;
@@ -710,10 +845,14 @@ async function runPhase06(): Promise<boolean> {
       console.log("\n[fixture] phase=06");
       ok = (await runPhase06()) && ok;
     }
+    if (phase === "07" || phase === "all") {
+      console.log("\n[fixture] phase=07");
+      ok = (await runPhase07()) && ok;
+    }
     if (
       phase !== "00" && phase !== "01" && phase !== "02" &&
       phase !== "03" && phase !== "04" && phase !== "05" &&
-      phase !== "06" && phase !== "all"
+      phase !== "06" && phase !== "07" && phase !== "all"
     ) {
       console.log(`  [UNCHECKED] Phase ${phase} checks not yet implemented.`);
     }
