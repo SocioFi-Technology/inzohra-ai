@@ -21,5 +21,9 @@ __pycache__/
 
 fixtures/*/
 !fixtures/*/README.md
+# Guard large files dropped directly at fixtures/ root
+fixtures/*.pdf
+fixtures/*.docx
+fixtures/*.json
 
 coverage/

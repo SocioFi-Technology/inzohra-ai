@@ -2,7 +2,14 @@
 name = "inzohra-shared"
 version = "0.1.0"
 requires-python = ">=3.11"
-dependencies = ["pydantic>=2.6.0", "anthropic>=0.30.0", "httpx>=0.27.0"]
+dependencies = [
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "anthropic>=0.30.0",
+    "httpx>=0.27.0",
+    "psycopg[binary]>=3.1.0",
+    "boto3>=1.34.0",
+]
 
 [build-system]
 requires = ["hatchling"]
