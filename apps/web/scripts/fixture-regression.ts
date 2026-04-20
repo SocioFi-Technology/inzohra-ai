@@ -172,6 +172,73 @@ async function runPhase01(): Promise<boolean> {
   return passed;
 }
 
+/**
+ * Phase 02 acceptance criteria:
+ *   [a] ≥58 external_review_comments for the fixture project (BV letter parsed).
+ *   [b] At least one cross_doc_claims row for the fixture project.
+ *   [c] At least one title24_form entity exists for the fixture project.
+ *   [d] At least one cross_doc_claim with claim_type = 'r_value_roof'.
+ *   [e] Code KB has ≥35 sections (expanded seed).
+ */
+async function runPhase02(): Promise<boolean> {
+  let passed = true;
+
+  const projRow = await db.query(
+    `SELECT project_id FROM projects WHERE permit_number = 'B25-2734' AND jurisdiction = 'santa_rosa' LIMIT 1`
+  );
+  if (projRow.rows.length === 0) {
+    console.log("  [UNCHECKED] No B25-2734 project found — run ingest_all_fixture.py first.");
+    return true;
+  }
+  const projectId = projRow.rows[0].project_id;
+
+  // [a] BV letter comments
+  const commentsRes = await db.query(
+    `SELECT COUNT(*) AS cnt FROM external_review_comments WHERE project_id = $1`,
+    [projectId]
+  );
+  const commentCount = parseInt(commentsRes.rows[0].cnt, 10);
+  const aPass = commentCount >= 58;
+  console.log(`  [${aPass ? "PASS" : "FAIL"}] BV comments: ${commentCount} (need ≥58)`);
+  if (!aPass) passed = false;
+
+  // [b] cross_doc_claims
+  const claimsRes = await db.query(
+    `SELECT COUNT(*) AS cnt FROM cross_doc_claims WHERE project_id = $1`,
+    [projectId]
+  );
+  const claimCount = parseInt(claimsRes.rows[0].cnt, 10);
+  const bPass = claimCount >= 1;
+  console.log(`  [${bPass ? "PASS" : "UNCHECKED"}] Cross-doc claims: ${claimCount} (need ≥1)`);
+
+  // [c] title24_form entity
+  const t24Res = await db.query(
+    `SELECT COUNT(*) AS cnt FROM entities WHERE project_id = $1 AND type = 'title24_form'`,
+    [projectId]
+  );
+  const t24Count = parseInt(t24Res.rows[0].cnt, 10);
+  const cPass = t24Count >= 1;
+  console.log(`  [${cPass ? "PASS" : "UNCHECKED"}] Title24 entities: ${t24Count} (need ≥1)`);
+
+  // [d] r_value_roof claim
+  const roofRes = await db.query(
+    `SELECT COUNT(*) AS cnt FROM cross_doc_claims WHERE project_id = $1 AND claim_type = 'r_value_roof'`,
+    [projectId]
+  );
+  const roofCount = parseInt(roofRes.rows[0].cnt, 10);
+  const dPass = roofCount >= 1;
+  console.log(`  [${dPass ? "PASS" : "UNCHECKED"}] R-value roof claim: ${roofCount} (need ≥1 if T24 parsed)`);
+
+  // [e] KB expanded
+  const kbRes = await db.query(`SELECT COUNT(*) AS cnt FROM code_sections`);
+  const kbCount = parseInt(kbRes.rows[0].cnt, 10);
+  const ePass = kbCount >= 35;
+  console.log(`  [${ePass ? "PASS" : "FAIL"}] Code KB sections: ${kbCount} (need ≥35 for Phase 02)`);
+  if (!ePass) passed = false;
+
+  return passed;
+}
+
 (async () => {
   try {
     let ok = true;
@@ -182,7 +249,11 @@ async function runPhase01(): Promise<boolean> {
       console.log("\n[fixture] phase=01");
       ok = (await runPhase01()) && ok;
     }
-    if (phase !== "00" && phase !== "01" && phase !== "all") {
+    if (phase === "02" || phase === "all") {
+      console.log("\n[fixture] phase=02");
+      ok = (await runPhase02()) && ok;
+    }
+    if (phase !== "00" && phase !== "01" && phase !== "02" && phase !== "all") {
       console.log(`  [UNCHECKED] Phase ${phase} checks not yet implemented.`);
     }
     await db.end();

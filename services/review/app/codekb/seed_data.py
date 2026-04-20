@@ -322,6 +322,254 @@ CBC_508_716_SECTIONS: list[SeedSection] = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# CBC Chapter 5 — General Building Heights and Areas
+# ---------------------------------------------------------------------------
+
+CBC_CH5_SECTIONS: list[SeedSection] = [
+    SeedSection(
+        canonical_id="CBC-503",
+        code="CBC",
+        section_number="503",
+        title="General Building Height and Area Limitations",
+        body_text=(
+            "The building height and building area shall not exceed the limits specified in "
+            "Table 503 based on the occupancy classification and the type of construction. "
+            "Each portion of a building separated by one or more fire walls complying with "
+            "Section 706 shall be considered a separate building."
+        ),
+    ),
+    SeedSection(
+        canonical_id="CBC-TBL-503",
+        code="CBC",
+        section_number="Table 503",
+        title="Allowable Building Heights and Areas",
+        body_text=(
+            "Table 503: Allowable building heights in feet and number of stories, and allowable "
+            "area per story in square feet, based on occupancy group and construction type. "
+            "For Type V-A (one-hour), R-2.1: height 50 ft / 4 stories, area 9,000 sq ft per story. "
+            "Unlimited area and height adjustments available per Section 506 with automatic sprinkler system."
+        ),
+    ),
+    SeedSection(
+        canonical_id="CBC-302.1",
+        code="CBC",
+        section_number="302.1",
+        title="Occupancy Classification",
+        body_text=(
+            "Structures or portions of structures shall be classified with respect to occupancy "
+            "in one or more of the groups listed in this section. A room or space that is "
+            "intended to be occupied at different times for two or more different purposes "
+            "shall comply with all of the requirements that are applicable to each of the "
+            "purposes for which the room or space will be occupied."
+        ),
+        cross_references=["CBC-310", "CBC-311", "CBC-312"],
+    ),
+    SeedSection(
+        canonical_id="CBC-310.5.3",
+        code="CBC",
+        section_number="310.5.3",
+        title="Residential Group R-2.1 (Care facilities, 7 or more clients)",
+        body_text=(
+            "Residential occupancies containing buildings or portions thereof providing "
+            "sleeping accommodations for ambulatory clients receiving care on a 24-hour "
+            "basis, with 7 or more residents. This group shall comply with the California "
+            "Health and Safety Code and local regulations in addition to applicable "
+            "provisions of this code. For fire sprinkler requirements, see HSC §13131.5."
+        ),
+        cross_references=["HSC-13131.5", "CBC-903.2.8"],
+    ),
+]
+
+
+# ---------------------------------------------------------------------------
+# CBC Chapter 10 — Means of Egress
+# ---------------------------------------------------------------------------
+
+CBC_CH10_SECTIONS: list[SeedSection] = [
+    SeedSection(
+        canonical_id="CBC-1004.1",
+        code="CBC",
+        section_number="1004.1",
+        title="Occupant Load — Design occupant load",
+        body_text=(
+            "The design occupant load for a room or area shall not be less than the number "
+            "determined by dividing the floor area under consideration by the occupant load "
+            "factor for that use as specified in Table 1004.5. Where an intended use is not "
+            "listed in Table 1004.5, the building official shall establish the occupant load."
+        ),
+        cross_references=["CBC-TBL-1004.5"],
+    ),
+    SeedSection(
+        canonical_id="CBC-1005.1",
+        code="CBC",
+        section_number="1005.1",
+        title="Minimum Required Egress Width",
+        body_text=(
+            "The minimum required egress capacity for doors, stairways and ramps shall be "
+            "calculated based on 0.2 inches per occupant for stairways and 0.15 inches per "
+            "occupant for other means of egress components. The minimum clear width of any "
+            "means of egress component shall not be less than that specified for such "
+            "component elsewhere in this chapter."
+        ),
+    ),
+    SeedSection(
+        canonical_id="CBC-1010.1.9",
+        code="CBC",
+        section_number="1010.1.9",
+        title="Door Operations — Egress door hardware",
+        body_text=(
+            "Egress doors shall be readily openable from the egress side without the use "
+            "of a key or special knowledge or effort. Delayed egress locking systems, "
+            "access-controlled egress door assemblies, and electromagnetically locked "
+            "egress door assemblies are permitted where specified in Section 1010.1.9.7."
+        ),
+    ),
+    SeedSection(
+        canonical_id="CBC-1006.3.3",
+        code="CBC",
+        section_number="1006.3.3",
+        title="Two exits or exit access doorways — R occupancies",
+        body_text=(
+            "Where access to a single exit is permitted, dwelling units and sleeping "
+            "units in Group R occupancies shall be provided with access to not less than "
+            "two exits or exit access doorways where the building has more than one "
+            "story above grade plane, or where the story has an area exceeding 4,000 "
+            "square feet."
+        ),
+    ),
+    SeedSection(
+        canonical_id="CBC-1015.2",
+        code="CBC",
+        section_number="1015.2",
+        title="Window sill height — Emergency escape and rescue openings",
+        body_text=(
+            "Emergency escape and rescue openings shall have a minimum net clear opening "
+            "of 5.7 square feet (0.53 m²). The minimum net clear opening height shall "
+            "be 24 inches (610 mm). The minimum net clear opening width shall be 20 inches "
+            "(508 mm). The maximum finished sill height shall be 44 inches (1118 mm) above "
+            "the floor, or shall have a permanently attached ladder or step."
+        ),
+        cross_references=["CBC-1030.1"],
+    ),
+    SeedSection(
+        canonical_id="CBC-1030.1",
+        code="CBC",
+        section_number="1030.1",
+        title="Emergency Escape and Rescue Openings — General",
+        body_text=(
+            "In addition to the means of egress required by this chapter, provisions shall "
+            "be made for emergency escape and rescue openings in Group R-2 occupancies in "
+            "accordance with Sections 1030.1 through 1030.7. Emergency escape and rescue "
+            "openings shall open directly into a public way or to a yard or court that opens "
+            "to a public way."
+        ),
+    ),
+]
+
+
+# ---------------------------------------------------------------------------
+# CEnC (California Energy Code) §150
+# ---------------------------------------------------------------------------
+
+CENC_150_SECTIONS: list[SeedSection] = [
+    SeedSection(
+        canonical_id="CEnC-150.0(a)",
+        code="CEnC",
+        section_number="150.0(a)",
+        title="Mandatory Features and Devices — Insulation",
+        body_text=(
+            "All insulation materials, including facings and vapor retarders, shall comply "
+            "with the requirements of Section 150.0(a). Roof/ceiling assemblies: minimum "
+            "R-38 for Climate Zone 2. Wall insulation: minimum R-15 for wood-frame walls. "
+            "Floor insulation over unconditioned space: minimum R-19. These are minimum "
+            "values; the prescriptive compliance path (CF1R-PRF) may require higher values "
+            "based on climate zone and assembly type."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CEnC-150.1", "CEnC-TBL-150.1-A"],
+    ),
+    SeedSection(
+        canonical_id="CEnC-150.1",
+        code="CEnC",
+        section_number="150.1",
+        title="Performance and Prescriptive Compliance — Residential",
+        body_text=(
+            "Newly constructed residential buildings shall comply with the performance "
+            "approach using the Energy Design Rating (EDR) or the prescriptive approach "
+            "specified in Section 150.1. The prescriptive approach requires compliance "
+            "with the component packages specified in Table 150.1-A for the applicable "
+            "climate zone. Climate Zone 2 (Santa Rosa) prescriptive roof insulation: R-38 "
+            "minimum; walls: R-15 or R-13+4 CI; slab: R-10 for 16 inches."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CEnC-150.0", "CEnC-TBL-150.1-A"],
+    ),
+    SeedSection(
+        canonical_id="CEnC-TBL-150.1-A",
+        code="CEnC",
+        section_number="Table 150.1-A",
+        title="Prescriptive Envelope Requirements — Climate Zone 2",
+        body_text=(
+            "Climate Zone 2 prescriptive insulation requirements: "
+            "Roof/Ceiling: R-38 minimum (attic), R-22+CI for cathedralized. "
+            "Exterior Walls: R-15 minimum batts OR R-13 batts + R-4 CI. "
+            "Floors over unconditioned space: R-19 minimum. "
+            "Slab edge: R-10 to 16 inches depth. "
+            "Windows: U-0.32 maximum, SHGC 0.25 maximum."
+        ),
+        effective_date="2023-01-01",
+    ),
+]
+
+
+# ---------------------------------------------------------------------------
+# CPC Chapter 4 — Plumbing fixtures
+# ---------------------------------------------------------------------------
+
+CPC_CH4_SECTIONS: list[SeedSection] = [
+    SeedSection(
+        canonical_id="CPC-408.0",
+        code="CPC",
+        section_number="408.0",
+        title="Water Closets — Required number",
+        body_text=(
+            "Water closets shall be provided for each sex in accordance with Table 4-1. "
+            "In residential occupancies with six or fewer occupants, one water closet shall "
+            "be permitted. Accessible water closets shall comply with Chapter 11B of CBC."
+        ),
+        cross_references=["CPC-TBL-4-1"],
+    ),
+    SeedSection(
+        canonical_id="CPC-TBL-4-1",
+        code="CPC",
+        section_number="Table 4-1",
+        title="Minimum Plumbing Fixtures",
+        body_text=(
+            "For residential occupancies (Group R): 1 water closet per 1-8 persons, "
+            "1 lavatory per 1-8 persons, 1 bathtub or shower per 1-8 persons, "
+            "1 kitchen sink per dwelling unit. For Group R-2.1 care facilities: "
+            "additional fixtures may be required per local health department regulations. "
+            "Consult local AHJ and California Department of Social Services requirements."
+        ),
+    ),
+    SeedSection(
+        canonical_id="CPC-603.1",
+        code="CPC",
+        section_number="603.1",
+        title="Water heater installation",
+        body_text=(
+            "Water heaters shall be installed in accordance with the manufacturer's "
+            "installation instructions and the requirements of this code. Water heaters "
+            "installed in garages or living spaces shall be protected from vehicle damage. "
+            "All water heaters shall be seismically strapped in two locations per CBC "
+            "Section 507.2 and CPC Section 508.0."
+        ),
+    ),
+]
+
+
 ALL_SEED_SECTIONS: list[SeedSection] = (
     CBC_107_SECTIONS + CBC_11B_SECTIONS + CBC_508_716_SECTIONS
+    + CBC_CH5_SECTIONS + CBC_CH10_SECTIONS + CENC_150_SECTIONS + CPC_CH4_SECTIONS
 )

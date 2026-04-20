@@ -39,6 +39,14 @@ from app.extractors.sheet_index import (
     VERSION as SIX_VERSION,
     extract_sheet_index,
 )
+from app.extractors.schedule import (
+    VERSION as SCH_VERSION,
+    extract_schedules,
+)
+from app.extractors.code_note import (
+    VERSION as CN_VERSION,
+    extract_code_notes,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -53,7 +61,7 @@ class PipelineConfig:
     model_primary: str = "claude-sonnet-4-5"
     thumb_dpi: int = 144
     extract_dpi: int = 300
-    extractor_version: str = f"title_block:{TB_VERSION}+sid:{SID_VERSION}+six:{SIX_VERSION}"
+    extractor_version: str = f"title_block:{TB_VERSION}+sid:{SID_VERSION}+six:{SIX_VERSION}+sch:{SCH_VERSION}+cn:{CN_VERSION}"
 
 
 # ---------------------------------------------------------------------------
@@ -488,6 +496,94 @@ def run_plan_set_pipeline(
                     "sheet_id": sheet_id,
                     "page": page_number,
                     "sheet_index": six.model_dump(),
+                })
+
+            # --- ScheduleAgent ---
+            sch_call_logs: list[dict[str, Any]] = []
+            schedules = extract_schedules(
+                page,
+                sheet_id=sheet_id,
+                api_key=cfg.anthropic_api_key,
+                model=cfg.model_primary,
+                call_log_rows=sch_call_logs,
+            )
+            all_call_logs.extend(sch_call_logs)
+
+            for sch in schedules:
+                sch_entity_id = str(uuid.uuid4())
+                sch_payload = Jsonb(sch.to_entity_payload())
+                # Entity bbox = union of all row bboxes
+                row_bboxes = [r.bbox for r in sch.rows if r.bbox and r.bbox != [0.0, 0.0, 0.0, 0.0]]
+                if row_bboxes:
+                    sch_bbox = [
+                        min(b[0] for b in row_bboxes), min(b[1] for b in row_bboxes),
+                        max(b[2] for b in row_bboxes), max(b[3] for b in row_bboxes),
+                    ]
+                else:
+                    sch_bbox = [0.0, 0.0, page_w, page_h]
+
+                conn.execute(
+                    """INSERT INTO entities
+                         (entity_id, project_id, document_id, sheet_id, type, payload,
+                          bbox, page, extractor_version, confidence, source_track)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                    (sch_entity_id, project_id, document_id, sheet_id,
+                     sch.schedule_type, sch_payload,
+                     sch_bbox, page_number,
+                     f"schedule:{SCH_VERSION}+{sch.extraction_method}",
+                     sch.confidence,
+                     "vision" if sch.extraction_method == "vision" else "text"),
+                )
+
+                # Insert individual schedule_rows
+                for row in sch.rows:
+                    conn.execute(
+                        """INSERT INTO schedule_rows
+                             (entity_id, project_id, schedule_type, row_index, tag,
+                              payload, bbox, confidence, extractor_version)
+                           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                        (sch_entity_id, project_id, sch.schedule_type,
+                         row.row_index, row.tag,
+                         Jsonb(row.model_dump()),
+                         row.bbox, row.confidence,
+                         f"schedule:{SCH_VERSION}"),
+                    )
+
+                result.entities.append({
+                    "entity_id": sch_entity_id,
+                    "sheet_id": sheet_id,
+                    "page": page_number,
+                    "schedule": sch.model_dump(),
+                })
+
+            # --- CodeNoteAgent ---
+            cn_call_logs: list[dict[str, Any]] = []
+            code_notes = extract_code_notes(
+                page,
+                sheet_id=sheet_id,
+                api_key=cfg.anthropic_api_key,
+                model=cfg.model_primary,
+                call_log_rows=cn_call_logs,
+            )
+            all_call_logs.extend(cn_call_logs)
+
+            for cn in code_notes:
+                cn_entity_id = str(uuid.uuid4())
+                cn_payload = Jsonb(cn.to_entity_payload())
+                conn.execute(
+                    """INSERT INTO entities
+                         (entity_id, project_id, document_id, sheet_id, type, payload,
+                          bbox, page, extractor_version, confidence, source_track)
+                       VALUES (%s, %s, %s, %s, 'code_note', %s, %s, %s, %s, %s, 'text')""",
+                    (cn_entity_id, project_id, document_id, sheet_id,
+                     cn_payload, [0.0, 0.0, page_w, page_h],
+                     page_number, f"code_note:{CN_VERSION}", cn.confidence),
+                )
+                result.entities.append({
+                    "entity_id": cn_entity_id,
+                    "sheet_id": sheet_id,
+                    "page": page_number,
+                    "code_note": cn.model_dump(),
                 })
 
         # --- persist llm_call_log rows ---

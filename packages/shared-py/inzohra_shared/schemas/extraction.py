@@ -108,3 +108,165 @@ class SheetIndex(BaseModel):
 
     def to_entity_payload(self) -> dict:  # type: ignore[type-arg]
         return self.model_dump()
+
+
+# ---------------------------------------------------------------------------
+# Phase 02 — Schedule extraction
+# ---------------------------------------------------------------------------
+
+class ScheduleRow(BaseModel):
+    """A single data row extracted from any schedule table."""
+    row_index: int
+    tag: str | None = None                  # MARK / TAG column value
+    cells: dict[str, str | None]            # { header_name: cell_value }
+    bbox: list[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0, 0.0])
+    confidence: float = Field(ge=0.0, le=1.0, default=0.85)
+
+
+class DoorScheduleRow(ScheduleRow):
+    """Typed overlay for door-schedule rows (common columns pre-parsed)."""
+    width_raw: str | None = None            # e.g. "3'0\""
+    height_raw: str | None = None           # e.g. "6'8\""
+    door_type: str | None = None
+    material: str | None = None
+    fire_rating: str | None = None          # "20 min", "45 min", "1 hr", "N/A"
+    hardware_group: str | None = None
+
+
+class WindowScheduleRow(ScheduleRow):
+    """Typed overlay for window-schedule rows."""
+    width_raw: str | None = None
+    height_raw: str | None = None
+    window_type: str | None = None
+    u_factor: float | None = None
+    shgc: float | None = None
+    egress_compliant: bool | None = None
+    nco_area: float | None = None           # net clear opening area (sq ft)
+
+
+class ScheduleExtraction(BaseModel):
+    """Output of ScheduleAgent for one schedule table."""
+    VERSION: ClassVar[str] = "1.0.0"
+
+    schedule_type: str        # "door_schedule" | "window_schedule"
+                              # | "fastener_schedule" | "holdown_schedule" | "wall_schedule"
+    sheet_id: str
+    headers: list[str]
+    rows: list[ScheduleRow]
+    extraction_method: str    # "native_table" | "vision"
+    confidence: float = Field(ge=0.0, le=1.0, default=0.85)
+
+    def to_entity_payload(self) -> dict:  # type: ignore[type-arg]
+        return self.model_dump()
+
+
+# ---------------------------------------------------------------------------
+# Phase 02 — Code-note extraction
+# ---------------------------------------------------------------------------
+
+class CodeNoteItem(BaseModel):
+    reference: str | None = None    # e.g. "2022 CBC", "CBC §107.2.1"
+    statement: str
+    bbox: list[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0, 0.0])
+    confidence: float = Field(ge=0.0, le=1.0, default=0.85)
+
+
+class CodeNoteExtraction(BaseModel):
+    """One code-note block (e.g. 'APPLICABLE CODES' or 'DESIGN CRITERIA')."""
+    VERSION: ClassVar[str] = "1.0.0"
+
+    block_type: str                 # "applicable_codes" | "design_criteria"
+                                    # | "occupancy" | "construction_type" | "other"
+    block_title: str | None = None
+    items: list[CodeNoteItem]
+    confidence: float = Field(ge=0.0, le=1.0, default=0.85)
+
+    def to_entity_payload(self) -> dict:  # type: ignore[type-arg]
+        return self.model_dump()
+
+
+# ---------------------------------------------------------------------------
+# Phase 02 — Title 24 / CF1R extraction
+# ---------------------------------------------------------------------------
+
+class T24Surface(BaseModel):
+    surface_type: str               # "roof" | "wall" | "floor" | "window" | "skylight"
+    assembly_id: str | None = None
+    area: float | None = None       # sq ft
+    u_factor: float | None = None
+    r_value: float | None = None    # stated directly or derived 1/u_factor
+    assembly_description: str | None = None
+    meets_prescriptive: bool | None = None
+
+
+class T24HvacSystem(BaseModel):
+    system_id: str | None = None
+    system_type: str | None = None
+    seer: float | None = None
+    eer: float | None = None
+    afue: float | None = None
+    hspf: float | None = None
+    cooling_btu: float | None = None
+    heating_btu: float | None = None
+
+
+class T24Dhw(BaseModel):
+    fuel_type: str | None = None
+    tank_size_gal: float | None = None
+    ef: float | None = None
+    uef: float | None = None
+
+
+class Title24Extraction(BaseModel):
+    """Output of Title24FormAgent for one CF1R / RMS-1 / MF1R document."""
+    VERSION: ClassVar[str] = "1.0.0"
+
+    form_type: str                           # "CF1R-PRF-01-E" | "RMS-1" | "MF1R" | "unknown"
+    project_name: str | None = None
+    project_address: str | None = None
+    climate_zone: str | None = None
+    permit_date: str | None = None
+    conditioned_floor_area: float | None = None
+    compliance_result: str | None = None     # "PASS" | "FAIL" | "N/A"
+    envelope_surfaces: list[T24Surface] = Field(default_factory=list)
+    hvac_systems: list[T24HvacSystem] = Field(default_factory=list)
+    dhw_systems: list[T24Dhw] = Field(default_factory=list)
+    confidence: float = Field(ge=0.0, le=1.0, default=0.80)
+
+    def to_entity_payload(self) -> dict:  # type: ignore[type-arg]
+        return self.model_dump()
+
+
+# ---------------------------------------------------------------------------
+# Phase 02 — Review-letter comment (one row → external_review_comments)
+# ---------------------------------------------------------------------------
+
+class ReviewLetterComment(BaseModel):
+    comment_number: int
+    discipline_group: str | None = None    # BV section header, e.g. "ARCHITECTURE"
+    discipline: str | None = None          # normalised, e.g. "architectural"
+    review_round: int = 1
+    typography: str | None = None          # "italic" | "bold" | "underlined"
+    comment_text: str
+    citation_text: str | None = None       # e.g. "CBC §107.2.1"
+    sheet_reference: str | None = None     # e.g. "Sheet A-1.1"
+    page_number: int = 1
+    bbox: list[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0, 0.0])
+    confidence: float = Field(ge=0.0, le=1.0, default=0.85)
+
+
+class ReviewLetterExtraction(BaseModel):
+    """Output of ReviewLetterAgent for one plan-check letter PDF."""
+    VERSION: ClassVar[str] = "1.0.0"
+
+    project_name: str | None = None
+    project_address: str | None = None
+    permit_number: str | None = None
+    reviewer_name: str | None = None
+    review_date: str | None = None
+    total_comment_count: int = 0
+    comments: list[ReviewLetterComment] = Field(default_factory=list)
+    confidence: float = Field(ge=0.0, le=1.0, default=0.80)
+
+    def to_entity_payload(self) -> dict:  # type: ignore[type-arg]
+        return self.model_dump()
