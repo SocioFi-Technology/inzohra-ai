@@ -343,63 +343,81 @@ export function buildJsonBundle(
   const styles = applyRoundStyles(findings, currentRound);
   const styleMap = new Map(styles.map((s) => [s.findingId, s.typography]));
 
-  // Group by discipline in canonical order, then number globally.
+  // ---------------------------------------------------------------------------
+  // Build display_text for a single finding row.
+  // ---------------------------------------------------------------------------
+  const buildDisplayText = (f: FindingRow): string => {
+    const rawText = f.polished_text ?? f.draft_comment_text;
+    const sheetLabel = resolveSheetLabel(f.sheet_reference?.sheet_id ?? "");
+    if (!sheetLabel) return rawText;
+    // Replace leading "Sheet <internal-uuid>:p<N>:" if the drafter emitted it.
+    const replaced = rawText.replace(
+      /^Sheet [a-f0-9-]+:[p\d]+:\s*/i,
+      `Sheet ${sheetLabel}: `,
+    );
+    // If no replacement happened and text doesn't already start with "Sheet", prepend.
+    if (replaced === rawText && !/^Sheet /i.test(rawText)) {
+      return `Sheet ${sheetLabel}: ${rawText}`;
+    }
+    return replaced;
+  };
+
+  // ---------------------------------------------------------------------------
+  // Deduplicate: within the same (rule_id, sheet_id) group, drop findings whose
+  // normalised display_text is identical to one already seen.  This collapses
+  // per-entity duplicates produced when the review engine runs the same rule on
+  // every window/door measurement independently but the drafter generates
+  // identical prose for each (e.g. 25 identical AR-WIN-NCO-001 findings on A-1.2).
+  // The first occurrence (earliest created_at) is kept; the rest are suppressed.
+  // ---------------------------------------------------------------------------
+  const deduplicateGroup = (group: FindingRow[]): FindingRow[] => {
+    const seen = new Set<string>();
+    return group.filter((f) => {
+      // Dedup key: rule_id + sheet_id + first 200 chars of normalised text
+      const text = (f.polished_text ?? f.draft_comment_text ?? "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 200);
+      const key = `${f.rule_id ?? ""}|${f.sheet_reference?.sheet_id ?? ""}|${text}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
+  // ---------------------------------------------------------------------------
+  // Group by discipline in canonical order, deduplicate, then number globally.
+  // ---------------------------------------------------------------------------
   let commentNumber = 0;
   const orderedFindings: LetterBundle["findings"] = [];
 
   for (const discipline of DISCIPLINE_ORDER) {
-    const group = findings.filter((f) => f.discipline === discipline);
-    for (const f of group) {
+    const raw = findings.filter((f) => f.discipline === discipline);
+    const deduped = deduplicateGroup(raw);
+    for (const f of deduped) {
       commentNumber += 1;
       const typography = styleMap.get(f.finding_id) ?? "normal";
-      const rawText = f.polished_text ?? f.draft_comment_text;
-      const sheetLabel = resolveSheetLabel(f.sheet_reference?.sheet_id ?? "");
-      // If the raw text already starts with "Sheet <raw_uuid>" replace it with
-      // the human-readable label; otherwise prepend the label.
-      let displayText = rawText;
-      if (sheetLabel) {
-        // Replace leading "Sheet <internal-id>:" if present.
-        displayText = rawText.replace(
-          /^Sheet [a-f0-9-]+:[p\d]+:\s*/i,
-          `Sheet ${sheetLabel}: `,
-        );
-        // If no replacement happened and text doesn't start with "Sheet", prepend.
-        if (displayText === rawText && !/^Sheet /i.test(rawText)) {
-          displayText = `Sheet ${sheetLabel}: ${rawText}`;
-        }
-      }
       orderedFindings.push({
         ...f,
         comment_number: commentNumber,
-        display_text: displayText,
+        display_text: buildDisplayText(f),
         typography,
       });
     }
   }
 
   // Findings whose discipline is not in DISCIPLINE_ORDER go at the end.
-  const unordered = findings.filter(
+  const unorderedRaw = findings.filter(
     (f) => !(DISCIPLINE_ORDER as readonly string[]).includes(f.discipline),
   );
+  const unordered = deduplicateGroup(unorderedRaw);
   for (const f of unordered) {
     commentNumber += 1;
     const typography = styleMap.get(f.finding_id) ?? "normal";
-    const rawText2 = f.polished_text ?? f.draft_comment_text;
-    const sheetLabel2 = resolveSheetLabel(f.sheet_reference?.sheet_id ?? "");
-    let displayText2 = rawText2;
-    if (sheetLabel2) {
-      displayText2 = rawText2.replace(
-        /^Sheet [a-f0-9-]+:[p\d]+:\s*/i,
-        `Sheet ${sheetLabel2}: `,
-      );
-      if (displayText2 === rawText2 && !/^Sheet /i.test(rawText2)) {
-        displayText2 = `Sheet ${sheetLabel2}: ${rawText2}`;
-      }
-    }
     orderedFindings.push({
       ...f,
       comment_number: commentNumber,
-      display_text: displayText2,
+      display_text: buildDisplayText(f),
       typography,
     });
   }
@@ -558,12 +576,8 @@ async function writePdf(bundle: LetterBundle, outPath: string): Promise<void> {
       doc.moveDown(0.4);
 
       for (const f of group) {
-        const sheetRef =
-          f.sheet_reference.sheet_id !== ""
-            ? `[${f.sheet_reference.sheet_id}${f.sheet_reference.detail ? ` — ${f.sheet_reference.detail}` : ""}] `
-            : "";
-
-        const prefix = `${f.comment_number}. ${sheetRef}`;
+        // BV dialect: "N. Sheet X: <comment text>" — no bracket prefix.
+        const prefix = `${f.comment_number}. `;
         const text = f.display_text;
 
         applyTypography(f.typography);
@@ -733,12 +747,8 @@ async function writeDocx(bundle: LetterBundle, outPath: string): Promise<void> {
     allParagraphs.push(labelParagraph(disciplineLabel(disc)));
 
     for (const f of group) {
-      const sheetRef =
-        f.sheet_reference.sheet_id !== ""
-          ? `[${f.sheet_reference.sheet_id}${f.sheet_reference.detail ? ` — ${f.sheet_reference.detail}` : ""}] `
-          : "";
-
-      const prefix = `${f.comment_number}. ${sheetRef}`;
+      // BV dialect: "N. Sheet X: <comment text>" — no bracket prefix.
+      const prefix = `${f.comment_number}. `;
 
       allParagraphs.push(
         new Paragraph({
