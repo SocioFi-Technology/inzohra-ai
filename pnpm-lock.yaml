@@ -99,6 +99,9 @@ importers:
       '@types/pdfkit':
         specifier: ^0.13.4
         version: 0.13.9
+      '@types/pg':
+        specifier: ^8.11.0
+        version: 8.20.0
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -943,6 +946,9 @@ packages:
 
   '@types/pdfkit@0.13.9':
     resolution: {integrity: sha512-RDG8Yb1zT7I01FfpwK7nMSA433XWpblMqSCtA5vJlSyavWZb303HUYPCel6JTiDDFqwGLvtAnYbH8N/e0Cb89g==}
+
+  '@types/pg@8.20.0':
+    resolution: {integrity: sha512-bEPFOaMAHTEP1EzpvHTbmwR8UsFyHSKsRisLIHVMXnpNefSbGA1bD6CVy+qKjGSqmZqNqBDV2azOBo8TgkcVow==}
 
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
@@ -3560,6 +3566,12 @@ snapshots:
   '@types/pdfkit@0.13.9':
     dependencies:
       '@types/node': 20.19.39
+
+  '@types/pg@8.20.0':
+    dependencies:
+      '@types/node': 20.19.39
+      pg-protocol: 1.13.0
+      pg-types: 2.2.0
 
   '@types/prop-types@15.7.15': {}
 

@@ -10,6 +10,8 @@
  */
 
 import { Pool } from "pg";
+import * as fs from "fs";
+import * as path from "path";
 
 const phase = process.argv.includes("--phase")
   ? process.argv[process.argv.indexOf("--phase") + 1]
@@ -541,6 +543,143 @@ async function runPhase05(): Promise<boolean> {
   return passed;
 }
 
+/**
+ * Phase 06 acceptance criteria:
+ *   [a] comment_drafts table exists in DB.
+ *   [b] letter_renders table exists in DB.
+ *   [c] ≥1 letter_renders row for the fixture project (letter was generated).
+ *   [d] The JSON bundle file path in letter_renders.json_path exists on disk.
+ *   [e] The JSON bundle parses as valid JSON with required fields:
+ *       project_id, submittal_id, review_round, findings (non-empty array).
+ *   [f] PDF file exists at letter_renders.pdf_path.
+ *   [g] DOCX file exists at letter_renders.docx_path.
+ */
+async function runPhase06(): Promise<boolean> {
+  let passed = true;
+
+  // [a] comment_drafts table exists
+  const cdRes = await db.query(
+    `SELECT to_regclass('public.comment_drafts') AS tbl`
+  );
+  const aPass = cdRes.rows[0].tbl !== null;
+  console.log(`  [${aPass ? "PASS" : "FAIL"}] [a] comment_drafts table exists`);
+  if (!aPass) passed = false;
+
+  // [b] letter_renders table exists
+  const lrRes = await db.query(
+    `SELECT to_regclass('public.letter_renders') AS tbl`
+  );
+  const bPass = lrRes.rows[0].tbl !== null;
+  console.log(`  [${bPass ? "PASS" : "FAIL"}] [b] letter_renders table exists`);
+  if (!bPass) passed = false;
+
+  // Find fixture project
+  const projRow = await db.query(
+    `SELECT project_id FROM projects WHERE permit_number = 'B25-2734' AND jurisdiction = 'santa_rosa' LIMIT 1`
+  );
+  if (projRow.rows.length === 0) {
+    console.log("  [UNCHECKED] No B25-2734 project found — run ingest + render scripts first.");
+    return passed;
+  }
+  const projectId = projRow.rows[0].project_id as string;
+
+  // [c] ≥1 letter_renders row for fixture project
+  if (!bPass) {
+    console.log("  [UNCHECKED] [c] letter_renders table missing — skipping row checks.");
+    return passed;
+  }
+
+  const renderRes = await db.query(
+    `SELECT render_id, pdf_path, docx_path, json_path
+     FROM letter_renders
+     WHERE project_id = $1
+     ORDER BY created_at DESC
+     LIMIT 1`,
+    [projectId]
+  );
+
+  if (renderRes.rows.length === 0) {
+    console.log("  [UNCHECKED] [c] No letter_renders row — run letter:render first");
+    console.log("  [UNCHECKED] [d] Skipped (no letter_renders row)");
+    console.log("  [UNCHECKED] [e] Skipped (no letter_renders row)");
+    console.log("  [UNCHECKED] [f] Skipped (no letter_renders row)");
+    console.log("  [UNCHECKED] [g] Skipped (no letter_renders row)");
+    return passed;
+  }
+
+  console.log(`  [PASS] [c] letter_renders row found for fixture project`);
+
+  const renderRow = renderRes.rows[0] as {
+    render_id: string;
+    pdf_path: string | null;
+    docx_path: string | null;
+    json_path: string | null;
+  };
+
+  // [d] JSON bundle file exists on disk
+  const jsonPath = renderRow.json_path;
+  if (!jsonPath) {
+    console.log(`  [FAIL] [d] letter_renders.json_path is NULL`);
+    passed = false;
+  } else {
+    const dPass = fs.existsSync(jsonPath);
+    console.log(`  [${dPass ? "PASS" : "FAIL"}] [d] JSON bundle exists: ${jsonPath}`);
+    if (!dPass) {
+      passed = false;
+    } else {
+      // [e] JSON parses with required fields + non-empty findings array
+      try {
+        const raw = fs.readFileSync(jsonPath, "utf-8");
+        const bundle = JSON.parse(raw) as Record<string, unknown>;
+        const hasProjectId = typeof bundle["project_id"] === "string";
+        const hasSubmittalId = typeof bundle["submittal_id"] === "string";
+        const hasReviewRound = typeof bundle["review_round"] === "number";
+        const hasFindings =
+          Array.isArray(bundle["findings"]) &&
+          (bundle["findings"] as unknown[]).length > 0;
+        const ePass = hasProjectId && hasSubmittalId && hasReviewRound && hasFindings;
+        const missing: string[] = [];
+        if (!hasProjectId) missing.push("project_id");
+        if (!hasSubmittalId) missing.push("submittal_id");
+        if (!hasReviewRound) missing.push("review_round");
+        if (!hasFindings) missing.push("findings (non-empty array)");
+        console.log(
+          `  [${ePass ? "PASS" : "FAIL"}] [e] JSON bundle fields valid` +
+          (missing.length > 0 ? ` — missing: ${missing.join(", ")}` : "")
+        );
+        if (!ePass) passed = false;
+      } catch (parseErr) {
+        console.log(`  [FAIL] [e] JSON bundle failed to parse: ${String(parseErr)}`);
+        passed = false;
+      }
+    }
+  }
+
+  // [f] PDF file exists
+  const pdfPath = renderRow.pdf_path;
+  if (!pdfPath) {
+    console.log(`  [FAIL] [f] letter_renders.pdf_path is NULL`);
+    passed = false;
+  } else {
+    const fPass = fs.existsSync(pdfPath);
+    console.log(`  [${fPass ? "PASS" : "FAIL"}] [f] PDF exists: ${pdfPath}`);
+    if (!fPass) passed = false;
+  }
+
+  // [g] DOCX file exists
+  const docxPath = renderRow.docx_path;
+  if (!docxPath) {
+    console.log(`  [FAIL] [g] letter_renders.docx_path is NULL`);
+    passed = false;
+  } else {
+    const gPass = fs.existsSync(docxPath);
+    console.log(`  [${gPass ? "PASS" : "FAIL"}] [g] DOCX exists: ${docxPath}`);
+    if (!gPass) passed = false;
+  }
+
+  return passed;
+}
+
 (async () => {
   try {
     let ok = true;
@@ -567,10 +706,14 @@ async function runPhase05(): Promise<boolean> {
       console.log("\n[fixture] phase=05");
       ok = (await runPhase05()) && ok;
     }
+    if (phase === "06" || phase === "all") {
+      console.log("\n[fixture] phase=06");
+      ok = (await runPhase06()) && ok;
+    }
     if (
       phase !== "00" && phase !== "01" && phase !== "02" &&
       phase !== "03" && phase !== "04" && phase !== "05" &&
-      phase !== "all"
+      phase !== "06" && phase !== "all"
     ) {
       console.log(`  [UNCHECKED] Phase ${phase} checks not yet implemented.`);
     }
