@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "fixture": "tsx scripts/fixture-regression.ts",
+    "fixture": "tsx --env-file ../../.env scripts/fixture-regression.ts",
     "kb:seed": "tsx scripts/kb-seed.ts"
   },
   "dependencies": {

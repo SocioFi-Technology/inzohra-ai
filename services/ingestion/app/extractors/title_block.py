@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import io
 import json
 import re
 import time
@@ -17,25 +18,44 @@ import uuid
 from typing import Any
 
 import fitz  # PyMuPDF
+from PIL import Image as PILImage
 
 from inzohra_shared.schemas.extraction import BBoxField, TitleBlockExtraction
 
 # ---------------------------------------------------------------------------
 # Agent version — bump whenever the prompt or output schema changes.
 # ---------------------------------------------------------------------------
-VERSION = "1.2.0"
+VERSION = "1.4.0"
 
 # ---------------------------------------------------------------------------
 # Vision prompt — sent as the user text alongside the title-block crop image.
 # ---------------------------------------------------------------------------
 _VISION_SYSTEM = (
     "You are an expert architectural drawing analyst specialising in California "
-    "residential permit sets. Your task is to extract structured data from the "
-    "title block region of an architectural sheet."
+    "residential permit sets. Extract structured data precisely from title blocks. "
+    "Be literal — only report text you can clearly read."
 )
 
-_VISION_USER_PROMPT = """Extract the following fields from this architectural drawing title block.
-Return ONLY valid JSON with this exact structure (null for missing fields):
+_VISION_USER_PROMPT = """This image shows a title block strip from an architectural/engineering drawing sheet.
+The strip has been rotated 90 degrees clockwise for easier reading — all text should now appear horizontal.
+
+CRITICAL: Two addresses appear in this image — you MUST pick the correct one:
+
+1. ARCHITECT/FIRM address (DO NOT USE THIS ONE):
+   - Belongs to the designer/architect office (e.g. "2937 Veneman Avenue, Modesto, CA")
+   - Appears near the firm name or logo, often on the RIGHT side of this rotated image
+   - This is the designer's business address — NOT the project location
+
+2. PROJECT/SITE address (USE THIS ONE for "project_address"):
+   - This is the address of the PROPERTY being permitted (the building site)
+   - Appears in the LEFT or MIDDLE portion of this rotated image
+   - Often near the owner's name
+   - Example for this set: "2008 Dennis Lane, Santa Rosa, CA" or similar
+
+RULE: If you see a number like 2008 near a street name near the owner name, that is the project address.
+The firm address belongs to a city far from the project (e.g. Modesto, CA when project is in Santa Rosa, CA).
+
+Return ONLY valid JSON with this exact structure (null for any missing field):
 
 {
   "project_name": {"value": "...", "bbox_frac": [x1, y1, x2, y2]},
@@ -50,9 +70,8 @@ Return ONLY valid JSON with this exact structure (null for missing fields):
   "scale_declared": {"value": "...", "bbox_frac": [x1, y1, x2, y2]}
 }
 
-bbox_frac coordinates are fractions of the IMAGE dimensions: [left, top, right, bottom]
-where (0,0) is top-left and (1,1) is bottom-right.
-Return only the JSON object with no additional text."""
+bbox_frac: fractions of IMAGE dimensions [left, top, right, bottom], (0,0)=top-left.
+Return ONLY the JSON object — no surrounding text or markdown fences."""
 
 # ---------------------------------------------------------------------------
 # Label patterns used in the text track
@@ -207,15 +226,36 @@ def _detect_stamp(page: fitz.Page) -> bool:
 # Vision-track helpers
 # ---------------------------------------------------------------------------
 
-def _rasterize_title_block_crop(page: fitz.Page, dpi: int = 150) -> bytes:
+def _rasterize_title_block_crop(page: fitz.Page, dpi: int = 200) -> tuple[bytes, bool]:
     """Rasterize the title-block region for vision extraction.
 
-    Uses the same orientation-adaptive clip as the text track.
+    For landscape sheets the title block text is printed vertically (rotated 90° CCW).
+    This function crops the narrow right-side strip (20% of page width) and rotates it
+    90° CW so the text becomes horizontal — dramatically improving Claude's OCR accuracy.
+
+    Returns:
+        (png_bytes, was_rotated) — ``was_rotated`` is True for landscape sheets.
     """
-    clip = _get_title_block_clip(page)
-    mat = fitz.Matrix(dpi / 72, dpi / 72)
-    pix = page.get_pixmap(matrix=mat, clip=clip, alpha=False)
-    return pix.tobytes("png")
+    h = page.rect.height
+    w = page.rect.width
+
+    if w > h:
+        # Landscape: use the narrow title-block strip (right 20%) and rotate CW
+        clip = fitz.Rect(w * 0.80, 0.0, w, h)
+        mat = fitz.Matrix(dpi / 72, dpi / 72)
+        pix = page.get_pixmap(matrix=mat, clip=clip, alpha=False)
+        png = pix.tobytes("png")
+        img = PILImage.open(io.BytesIO(png))
+        rotated = img.rotate(-90, expand=True)  # -90 = 90° CW
+        buf = io.BytesIO()
+        rotated.save(buf, format="PNG")
+        return buf.getvalue(), True
+    else:
+        # Portrait: bottom 35%, no rotation needed
+        clip = fitz.Rect(0.0, h * 0.65, w, h)
+        mat = fitz.Matrix(dpi / 72, dpi / 72)
+        pix = page.get_pixmap(matrix=mat, clip=clip, alpha=False)
+        return pix.tobytes("png"), False
 
 
 def _extract_vision_fields(
@@ -235,7 +275,7 @@ def _extract_vision_fields(
     try:
         from anthropic import Anthropic
 
-        img_bytes = _rasterize_title_block_crop(page)
+        img_bytes, was_rotated = _rasterize_title_block_crop(page)
         img_b64 = base64.b64encode(img_bytes).decode()
 
         ph = hashlib.sha256(_VISION_USER_PROMPT.encode()).hexdigest()[:16]
@@ -286,34 +326,59 @@ def _extract_vision_fields(
         # Strip markdown fences if present
         text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text.strip())
         data = json.loads(text)
-        return _parse_vision_json(data, page)
+        return _parse_vision_json(data, page, was_rotated=was_rotated)
 
     except Exception as exc:  # noqa: BLE001
         print(f"[TitleBlockAgent] vision track failed: {exc}")
         return None
 
 
-def _frac_bbox_to_pts(bbox_frac: list[float], page: fitz.Page, crop_y0_frac: float = 0.65) -> list[float]:
-    """Convert fractional bbox (of the cropped image) back to page PDF points.
+def _frac_bbox_to_pts(
+    bbox_frac: list[float],
+    page: fitz.Page,
+    crop_y0_frac: float = 0.65,
+    was_rotated: bool = False,
+) -> list[float]:
+    """Convert fractional bbox (of the cropped/rotated image) back to PDF points.
 
-    The crop region is orientation-adaptive:
-    - Landscape: right 40% strip (x0=w*0.60, y0=0, x1=w, y1=h)
-    - Portrait: bottom 35% strip (x0=0, y0=h*0.65, x1=w, y1=h)
+    Landscape crops are rotated 90° CW before sending to Claude, so the returned
+    bbox_frac coordinates are in the ROTATED image space.  We apply the inverse
+    90° CCW rotation to recover PDF points.
+
+    Portrait crops are not rotated; the conversion is a straightforward affine map.
+
+    For the 90° CW rotation:
+      Original clip (clip_w × clip_h) → Rotated (clip_h × clip_w)
+      Rotated (rx, ry) → Original (fx=ry, fy=1-rx) as fractions of (clip_w, clip_h)
+
     ``crop_y0_frac`` is ignored (kept for backward compatibility).
     """
-    clip = _get_title_block_clip(page)
-    clip_w = clip.x1 - clip.x0
-    clip_h = clip.y1 - clip.y0
+    h = page.rect.height
+    w = page.rect.width
 
-    x1 = clip.x0 + bbox_frac[0] * clip_w
-    y1 = clip.y0 + bbox_frac[1] * clip_h
-    x2 = clip.x0 + bbox_frac[2] * clip_w
-    y2 = clip.y0 + bbox_frac[3] * clip_h
+    if was_rotated:
+        # Landscape narrow strip: clip = Rect(w*0.80, 0, w, h)
+        clip_x0, clip_y0 = w * 0.80, 0.0
+        clip_w, clip_h = w * 0.20, h
+        rx1, ry1, rx2, ry2 = bbox_frac
+        # Inverse of 90° CW: fx_orig = ry_rot, fy_orig = 1 - rx_rot
+        x1 = clip_x0 + ry1 * clip_w
+        x2 = clip_x0 + ry2 * clip_w
+        y1 = clip_y0 + (1.0 - rx2) * clip_h
+        y2 = clip_y0 + (1.0 - rx1) * clip_h
+    else:
+        clip = _get_title_block_clip(page)
+        clip_w = clip.x1 - clip.x0
+        clip_h = clip.y1 - clip.y0
+        x1 = clip.x0 + bbox_frac[0] * clip_w
+        y1 = clip.y0 + bbox_frac[1] * clip_h
+        x2 = clip.x0 + bbox_frac[2] * clip_w
+        y2 = clip.y0 + bbox_frac[3] * clip_h
     return [x1, y1, x2, y2]
 
 
 def _parse_vision_json(
-    data: dict[str, Any], page: fitz.Page
+    data: dict[str, Any], page: fitz.Page, was_rotated: bool = False
 ) -> dict[str, BBoxField]:
     results: dict[str, BBoxField] = {}
     for field in (
@@ -326,7 +391,7 @@ def _parse_vision_json(
             bbox_frac = raw.get("bbox_frac", [0.0, 0.0, 0.0, 0.0])
             if not isinstance(bbox_frac, list) or len(bbox_frac) != 4:
                 bbox_frac = [0.0, 0.0, 0.0, 0.0]
-            pts = _frac_bbox_to_pts(bbox_frac, page)
+            pts = _frac_bbox_to_pts(bbox_frac, page, was_rotated=was_rotated)
             results[field] = BBoxField(
                 value=str(raw["value"]).strip(),
                 bbox=pts,
@@ -377,10 +442,11 @@ def _merge_field(
                 vision_raw=vv,
             )
         else:
-            # Disagreement — flag at low confidence, prefer vision value
+            # Disagreement — flag at low confidence, prefer text value (PDF text
+            # extraction is authoritative over vision when both have a result).
             return BBoxField(
-                value=vv,
-                bbox=vision_val.bbox,
+                value=tv,
+                bbox=text_val.bbox if text_val.bbox != [0.0, 0.0, 0.0, 0.0] else vision_val.bbox,
                 confidence=0.40,
                 source_track="merged",
                 text_raw=tv,
@@ -424,37 +490,73 @@ def _normalize_address_words(addr: str) -> set[str]:
     return {_ABBREV_CANONICAL.get(w, w) for w in words}
 
 
-def _address_differs(extracted: str, canonical: str) -> bool:
-    """Return True when extracted address looks like a DIFFERENT property.
+def _parse_canonical_key(canonical: str) -> tuple[str | None, str | None]:
+    """Extract (house_number, street_name_words) from the canonical address.
 
-    Uses shared house-number detection first (robust to street-name abbrevs),
-    then falls back to normalised Jaccard for edge cases.
+    e.g. "2008 Dennis Ln, Santa Rosa, CA" → ("2008", "dennis")
 
-    False positives (e.g. "2008 DENNIS LANE, ST ROSA" vs "2008 Dennis Ln,
-    Santa Rosa, CA") are suppressed because both share house number "2008"
-    and street name token "dennis".
+    Returns (None, None) if the canonical address is not parseable.
     """
-    ext_numbers = set(re.findall(r"\b\d{3,5}\b", extracted))
-    can_numbers = set(re.findall(r"\b\d{3,5}\b", canonical))
+    m = re.match(r"\s*(\d{3,5})\s+(.+)", canonical.lower())
+    if not m:
+        return None, None
+    house_num = m.group(1)
+    rest = m.group(2)  # e.g. "dennis ln, santa rosa, ca"
 
-    if ext_numbers and can_numbers:
-        shared_nums = ext_numbers & can_numbers
-        if shared_nums:
-            # Same house number — check at least one street-name word matches
-            ext_words = _normalize_address_words(extracted) - ext_numbers
-            can_words = _normalize_address_words(canonical) - can_numbers
-            return not bool(ext_words & can_words)
-        else:
-            # Different house numbers → definitely a different property
-            return True
+    # Strip street type and everything after it to isolate the street name
+    _STREET_PAT = (
+        r"\b(?:ln|lane|st(?:reet)?|ave(?:nue)?|blvd|boulevard|"
+        r"rd|road|dr(?:ive)?|way|ct|court|pl(?:ace)?|hwy|highway)\b"
+    )
+    parts = re.split(_STREET_PAT, rest, maxsplit=1)
+    street_name_raw = parts[0]  # e.g. "dennis "
+    # Tokenise, drop pure-numeric tokens
+    tokens = [w for w in re.findall(r"[a-z]+", street_name_raw) if not w.isdigit()]
+    if not tokens:
+        return house_num, None
+    return house_num, " ".join(tokens)  # e.g. ("2008", "dennis")
 
-    # Fallback: normalised Jaccard (< 0.35 = mismatch)
+
+def _address_differs(extracted: str, canonical: str) -> bool:
+    """Return True when the extracted address is a DIFFERENT property from canonical.
+
+    Algorithm:
+    1. Parse the canonical address to extract its house number and street name.
+    2. Check that BOTH appear in the extracted address (normalised).
+    3. Falls back to Jaccard < 0.35 if canonical can't be parsed.
+
+    Examples (canonical = "2008 Dennis Ln, Santa Rosa, CA"):
+      "2008 DENNIS LANE, ST ROSA,"              → False  (same property) ✓
+      "2008 Dennis Lane, Santa Rosa, CA 95403"  → False  (same property) ✓
+      "2008 Bonita Lane, Santa Rosa, CA"        → True   (wrong street)  ✓
+      "1966 Dennis Ln, Santa Rosa, CA"          → True   (wrong number)  ✓
+      "2080 Dennis Lane, Santa Rosa, CA"        → True   (transposed)    ✓
+    """
+    can_num, can_street = _parse_canonical_key(canonical)
+    if not can_num:
+        # Fallback: normalised Jaccard
+        ext_norm = _normalize_address_words(extracted)
+        can_norm = _normalize_address_words(canonical)
+        if not ext_norm or not can_norm:
+            return False
+        return len(ext_norm & can_norm) / len(ext_norm | can_norm) < 0.35
+
     ext_norm = _normalize_address_words(extracted)
-    can_norm = _normalize_address_words(canonical)
-    if not ext_norm or not can_norm:
-        return False
-    score = len(ext_norm & can_norm) / len(ext_norm | can_norm)
-    return score < 0.35
+    ext_numbers = set(re.findall(r"\b\d{3,5}\b", extracted))
+
+    # House number must match exactly
+    if can_num not in ext_numbers:
+        return True
+
+    # Canonical street name words must appear in extracted (after normalisation)
+    if can_street:
+        can_street_tokens = set(re.findall(r"[a-z]+", can_street))
+        # Map through abbreviation table
+        can_street_norm = {_ABBREV_CANONICAL.get(t, t) for t in can_street_tokens}
+        if not (can_street_norm & ext_norm):
+            return True  # Street name absent → different property
+
+    return False
 
 
 # ---------------------------------------------------------------------------
