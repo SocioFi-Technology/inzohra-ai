@@ -177,11 +177,32 @@ async function buildSheetLabelMap(
     const rawKey = `${row.document_id}:p${String(row.page).padStart(3, "0")}`;
 
     // Determine the best human-readable label.
+    // Priority: canonical_id → sheet_number → sheet_identifier_raw payload → sheet_title → page number
     let label: string;
+
+    // Helper: valid sheet-ID pattern (uppercase discipline prefix + digit suffix).
+    const SHEET_ID_RE = /^[A-Z][-.]?\d[\w\-.]*$/;
+
+    // Extract sheet_identifier_raw from the title_block payload.
+    let payloadSheetId = "";
+    if (row.tb_payload) {
+      const rawId = row.tb_payload["sheet_identifier_raw"];
+      if (rawId && typeof rawId === "object") {
+        const rid = rawId as Record<string, unknown>;
+        const val = String(rid["value"] ?? "");
+        const vision = String(rid["vision_raw"] ?? "");
+        // Trust value first (extraction pipeline already chose the best merge).
+        if (SHEET_ID_RE.test(val)) payloadSheetId = val;
+        else if (SHEET_ID_RE.test(vision)) payloadSheetId = vision;
+      }
+    }
+
     if (row.canonical_id) {
-      label = row.canonical_id;                    // e.g. "A-1.2"
+      label = row.canonical_id;                    // e.g. "A-1.2" from SheetIdentifierParser
     } else if (row.sheet_number) {
-      label = row.sheet_number;                    // e.g. "A-1"
+      label = row.sheet_number;                    // e.g. "A-1.2" from backfill
+    } else if (payloadSheetId) {
+      label = payloadSheetId;                      // e.g. "A-1.2" from title_block payload
     } else {
       // Extract sheet_title from title_block payload if available.
       let sheetTitle = "";
@@ -312,7 +333,10 @@ export function buildJsonBundle(
       // Final fallback: just show the page number.
       return `${parseInt(match[2], 10)}`;
     }
-    return sheetId; // Return as-is if format is unrecognised.
+    // Non-UUID format (e.g. "Project-wide", "p001", "P-002") — the drafter
+    // already embedded the reference naturally in the comment text; don't add
+    // an extra "Sheet " prefix by returning a non-empty label here.
+    return "";
   };
 
   // Apply round styles (finding-id → typography)
