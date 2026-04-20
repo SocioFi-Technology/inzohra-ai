@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import argparse
 import os
-import sys
+import sys  # kept for sys.exit
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -25,9 +25,9 @@ from dotenv import load_dotenv
 _repo_root = Path(__file__).resolve().parent.parent
 load_dotenv(_repo_root / ".env", override=True)
 
-sys.path.insert(0, str(_repo_root / "services" / "ingestion"))
-sys.path.insert(0, str(_repo_root / "services" / "review"))
-sys.path.insert(0, str(_repo_root / "packages" / "shared-py"))
+# NOTE: No sys.path surgery needed — the uv workspace installs both
+# services/ingestion and services/review as editable namespace packages,
+# so Python resolves app.pipelines.* and app.reviewers.* correctly.
 
 import psycopg
 import psycopg.rows

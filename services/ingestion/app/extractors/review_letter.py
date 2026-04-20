@@ -325,7 +325,7 @@ def _call_llm_for_page_batch(
             model=model,
             system=_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": prompt_text}],
-            max_tokens=4096,
+            max_tokens=8192,
             temperature=0,  # invariant #4
         )
 
@@ -616,9 +616,9 @@ def extract_review_letter(
     use_llm = bool(api_key and not api_key.startswith("sk-ant-xxx"))
 
     if use_llm:
-        MAX_BATCH_SIZE = 5
-        MAX_BATCHES = 3
-        max_pages = MAX_BATCH_SIZE * MAX_BATCHES  # 15
+        MAX_BATCH_SIZE = 5    # ~29 comments per batch → ~13 k chars → fits in 8192-token output
+        MAX_BATCHES = 4       # covers up to 20 pages (10-page BV letter = 2 batches)
+        max_pages = MAX_BATCH_SIZE * MAX_BATCHES  # 20
 
         pages_to_process = pages_data[:max_pages]
 

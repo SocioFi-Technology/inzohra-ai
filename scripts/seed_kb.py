@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Seed the code KB with Phase-01 sections (CBC §107 + Ch 11B + §508/716).
+# -*- coding: utf-8 -*-
+"""Seed the code KB with Phase-01 sections (CBC s107 + Ch 11B + s508/716).
 
 Usage (from repo root)::
 
@@ -28,12 +29,12 @@ from pathlib import Path
 
 _repo_root = Path(__file__).resolve().parent.parent
 
-# Expose the review-service package so `app.codekb.*` imports resolve.
-sys.path.insert(0, str(_repo_root / "services" / "review"))
-
-from dotenv import load_dotenv  # noqa: E402  (after sys.path surgery)
+from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(_repo_root / ".env", override=True)
+
+# NOTE: No sys.path surgery — uv workspace resolves app.codekb.* via
+# namespace package across services/ingestion + services/review + services/measurement.
 
 # ---------------------------------------------------------------------------
 # Now safe to import project code
@@ -74,7 +75,7 @@ def main() -> None:
         sys.exit(1)
 
     total = len(ALL_SEED_SECTIONS)
-    print(f"KB seeder — {total} sections to process")
+    print(f"KB seeder - {total} sections to process")
     print(f"  DB : {database_url.split('@')[-1] if '@' in database_url else database_url[:48]}...")
 
     # --- generate embeddings ---
@@ -84,13 +85,13 @@ def main() -> None:
     texts = [s.body_text for s in ALL_SEED_SECTIONS]
     vectors: list[list[float]] = []
 
-    print(f"  Embedding {total} texts (batch={BATCH_SIZE}) …")
+    print(f"  Embedding {total} texts (batch={BATCH_SIZE})...")
     for i in range(0, len(texts), BATCH_SIZE):
         batch = texts[i : i + BATCH_SIZE]
         batch_vecs = embedder.embed(batch)
         vectors.extend(batch_vecs)
         done = min(i + BATCH_SIZE, total)
-        print(f"    {done:>3}/{total}  ✓")
+        print(f"    {done:>3}/{total}  ok")
 
     # Sanity-check dimensionality
     if vectors and len(vectors[0]) != EMBED_DIM:
@@ -165,7 +166,7 @@ def main() -> None:
     print()
     print(f"  Inserted : {inserted}")
     print(f"  Skipped  : {skipped}  (already in DB)")
-    print(f"\n[OK] Code KB seed complete — {inserted + skipped} sections available")
+    print(f"\n[OK] Code KB seed complete - {inserted + skipped} sections available")
 
 
 if __name__ == "__main__":

@@ -23,11 +23,13 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 _repo_root = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(_repo_root / "services" / "review"))
 
 from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(_repo_root / ".env", override=True)
+
+# NOTE: No sys.path surgery — uv workspace resolves app.* as a namespace package
+# spanning services/ingestion, services/review, and services/measurement.
 
 # ---------------------------------------------------------------------------
 # Imports
