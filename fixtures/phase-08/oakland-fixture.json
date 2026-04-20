@@ -1,0 +1,19 @@
+{
+  "fixture_id": "oakland-phase-08-stub",
+  "project": {
+    "address": "1234 Broadway, Oakland, CA 94612",
+    "jurisdiction": "oakland",
+    "permit_number": "B2025-00001",
+    "effective_date": "2025-01-01",
+    "occupancy_class": "R-2",
+    "construction_type": "V-A"
+  },
+  "expected_amendment_hits": [
+    {
+      "code": "CFC",
+      "section": "903.2.8",
+      "expected_amendment": "Oakland requires NFPA 13 sprinklers in all new R-2 regardless of height"
+    }
+  ],
+  "notes": "Phase 08 fixture stub. Full fixture (with plan-set PDFs) to be added in Phase 09."
+}

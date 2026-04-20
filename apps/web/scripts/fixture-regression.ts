@@ -697,6 +697,7 @@ async function runPhase06(): Promise<boolean> {
  *   [l] `services/review/app/comparison/alignment.py` file exists.
  *   [m] `services/review/app/shadow/shadow.py` file exists.
  */
+
 async function runPhase07(): Promise<boolean> {
   let passed = true;
 
@@ -815,6 +816,153 @@ async function runPhase07(): Promise<boolean> {
   return passed;
 }
 
+/**
+ * Phase 08 acceptance criteria (second jurisdiction / pack authoring):
+ *   [a] `submittal_checklists` table exists (hard fail).
+ *   [b] `drafter_examples` table exists (hard fail).
+ *   [c] `rule_metrics_live` view has a `jurisdiction` column (hard fail).
+ *   [d] ≥2 packs exist in `jurisdictional_packs` (soft warn — requires seed_packs.py).
+ *   [e] ≥20 amendments exist in `amendments` (soft warn — requires seed_packs.py).
+ *   [f] `services/review/app/codekb/resolver.py` exists (hard fail).
+ *   [g] `scripts/seed_packs.py` exists (hard fail).
+ *   [h] `packs/santa-rosa/pack.yaml` exists (hard fail).
+ *   [i] `packs/oakland/pack.yaml` exists (hard fail).
+ *   [j] `docs/authoring/new-jurisdiction.md` exists (hard fail).
+ *   [k] `apps/web/src/app/admin/packs/page.tsx` exists (hard fail).
+ *   [l] `services/review/tests/test_resolver.py` exists (hard fail).
+ *   [m] `skills/jurisdiction-oakland/SKILL.md` exists (hard fail).
+ */
+async function runPhase08(): Promise<boolean> {
+  let passed = true;
+
+  // Resolve repo root (two levels up from apps/web/scripts/)
+  const repoRoot = path.resolve(__dirname, "..", "..", "..", "..");
+
+  // [a] submittal_checklists table exists
+  const scRes = await db.query(
+    `SELECT to_regclass('public.submittal_checklists') AS tbl`
+  );
+  const aPass = scRes.rows[0].tbl !== null;
+  console.log(`  [${aPass ? "PASS" : "FAIL"}] [a] submittal_checklists table exists`);
+  if (!aPass) passed = false;
+
+  // [b] drafter_examples table exists
+  const deRes = await db.query(
+    `SELECT to_regclass('public.drafter_examples') AS tbl`
+  );
+  const bPass = deRes.rows[0].tbl !== null;
+  console.log(`  [${bPass ? "PASS" : "FAIL"}] [b] drafter_examples table exists`);
+  if (!bPass) passed = false;
+
+  // [c] rule_metrics_live view has a `jurisdiction` column
+  let cPass = false;
+  try {
+    await db.query(`SELECT jurisdiction FROM rule_metrics_live LIMIT 0`);
+    cPass = true;
+  } catch {
+    cPass = false;
+  }
+  console.log(`  [${cPass ? "PASS" : "FAIL"}] [c] rule_metrics_live view has jurisdiction column`);
+  if (!cPass) passed = false;
+
+  // [d] ≥2 packs in jurisdictional_packs (SOFT — warns but does not fail)
+  let dPass = false;
+  try {
+    const jpRes = await db.query(
+      `SELECT to_regclass('public.jurisdictional_packs') AS tbl`
+    );
+    if (jpRes.rows[0].tbl !== null) {
+      const packCountRes = await db.query(
+        `SELECT COUNT(*) AS cnt FROM jurisdictional_packs`
+      );
+      const packCount = parseInt(packCountRes.rows[0].cnt, 10);
+      dPass = packCount >= 2;
+      console.log(
+        `  [${dPass ? "PASS" : "UNCHECKED"}] [d] jurisdictional_packs count: ${packCount} ` +
+        `(need ≥2; run seed_packs.py if zero)`
+      );
+    } else {
+      console.log(`  [UNCHECKED] [d] jurisdictional_packs table not found — run DB migration first`);
+    }
+  } catch {
+    console.log(`  [UNCHECKED] [d] Could not query jurisdictional_packs — run seed_packs.py`);
+  }
+  // Soft check: do not propagate dPass failure to overall `passed`
+
+  // [e] ≥20 amendments in amendments table (SOFT — warns but does not fail)
+  try {
+    const amTblRes = await db.query(
+      `SELECT to_regclass('public.amendments') AS tbl`
+    );
+    if (amTblRes.rows[0].tbl !== null) {
+      const amCountRes = await db.query(
+        `SELECT COUNT(*) AS cnt FROM amendments`
+      );
+      const amCount = parseInt(amCountRes.rows[0].cnt, 10);
+      const ePass = amCount >= 20;
+      console.log(
+        `  [${ePass ? "PASS" : "UNCHECKED"}] [e] amendments count: ${amCount} ` +
+        `(need ≥20; run seed_packs.py if zero)`
+      );
+    } else {
+      console.log(`  [UNCHECKED] [e] amendments table not found — run DB migration first`);
+    }
+  } catch {
+    console.log(`  [UNCHECKED] [e] Could not query amendments — run seed_packs.py`);
+  }
+  // Soft check: do not propagate to overall `passed`
+
+  // [f] services/review/app/codekb/resolver.py exists
+  const resolverPy = path.join(repoRoot, "services", "review", "app", "codekb", "resolver.py");
+  const fPass = fs.existsSync(resolverPy);
+  console.log(`  [${fPass ? "PASS" : "FAIL"}] [f] services/review/app/codekb/resolver.py exists`);
+  if (!fPass) passed = false;
+
+  // [g] scripts/seed_packs.py exists
+  const seedPacksPy = path.join(repoRoot, "scripts", "seed_packs.py");
+  const gPass = fs.existsSync(seedPacksPy);
+  console.log(`  [${gPass ? "PASS" : "FAIL"}] [g] scripts/seed_packs.py exists`);
+  if (!gPass) passed = false;
+
+  // [h] packs/santa-rosa/pack.yaml exists
+  const santaRosaPack = path.join(repoRoot, "packs", "santa-rosa", "pack.yaml");
+  const hPass = fs.existsSync(santaRosaPack);
+  console.log(`  [${hPass ? "PASS" : "FAIL"}] [h] packs/santa-rosa/pack.yaml exists`);
+  if (!hPass) passed = false;
+
+  // [i] packs/oakland/pack.yaml exists
+  const oaklandPack = path.join(repoRoot, "packs", "oakland", "pack.yaml");
+  const iPass = fs.existsSync(oaklandPack);
+  console.log(`  [${iPass ? "PASS" : "FAIL"}] [i] packs/oakland/pack.yaml exists`);
+  if (!iPass) passed = false;
+
+  // [j] docs/authoring/new-jurisdiction.md exists
+  const authoringDoc = path.join(repoRoot, "docs", "authoring", "new-jurisdiction.md");
+  const jPass = fs.existsSync(authoringDoc);
+  console.log(`  [${jPass ? "PASS" : "FAIL"}] [j] docs/authoring/new-jurisdiction.md exists`);
+  if (!jPass) passed = false;
+
+  // [k] apps/web/src/app/admin/packs/page.tsx exists
+  const adminPacksPage = path.join(repoRoot, "apps", "web", "src", "app", "admin", "packs", "page.tsx");
+  const kPass = fs.existsSync(adminPacksPage);
+  console.log(`  [${kPass ? "PASS" : "FAIL"}] [k] apps/web/src/app/admin/packs/page.tsx exists`);
+  if (!kPass) passed = false;
+
+  // [l] services/review/tests/test_resolver.py exists
+  const testResolverPy = path.join(repoRoot, "services", "review", "tests", "test_resolver.py");
+  const lPass = fs.existsSync(testResolverPy);
+  console.log(`  [${lPass ? "PASS" : "FAIL"}] [l] services/review/tests/test_resolver.py exists`);
+  if (!lPass) passed = false;
+
+  // [m] skills/jurisdiction-oakland/SKILL.md exists
+  const oaklandSkill = path.join(repoRoot, "skills", "jurisdiction-oakland", "SKILL.md");
+  const mPass = fs.existsSync(oaklandSkill);
+  console.log(`  [${mPass ? "PASS" : "FAIL"}] [m] skills/jurisdiction-oakland/SKILL.md exists`);
+  if (!mPass) passed = false;
+
+  return passed;
+}
+
 (async () => {
   try {
     let ok = true;
@@ -849,10 +997,15 @@ async function runPhase07(): Promise<boolean> {
       console.log("\n[fixture] phase=07");
       ok = (await runPhase07()) && ok;
     }
+    if (phase === "08" || phase === "all") {
+      console.log("\n[fixture] phase=08");
+      ok = (await runPhase08()) && ok;
+    }
     if (
       phase !== "00" && phase !== "01" && phase !== "02" &&
       phase !== "03" && phase !== "04" && phase !== "05" &&
-      phase !== "06" && phase !== "07" && phase !== "all"
+      phase !== "06" && phase !== "07" && phase !== "08" &&
+      phase !== "all"
     ) {
       console.log(`  [UNCHECKED] Phase ${phase} checks not yet implemented.`);
     }

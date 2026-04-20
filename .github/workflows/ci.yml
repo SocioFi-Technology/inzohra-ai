@@ -56,9 +56,13 @@ jobs:
           conn.close()
           "
 
-      - name: Run Phase 07 fixture regression
+      - name: Fixture regression — phase 07
         run: pnpm --filter @inzohra/web run fixture -- 07
 
-      - name: Run all phases regression
+      - name: Fixture regression — phase 08
+        run: pnpm --filter @inzohra/web run fixture -- 08
+        continue-on-error: false
+
+      - name: Fixture regression — all (informational)
         run: pnpm --filter @inzohra/web run fixture -- all
-        continue-on-error: true  # Non-blocking for phases that need live data
+        continue-on-error: true

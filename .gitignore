@@ -21,6 +21,8 @@ __pycache__/
 
 fixtures/*/
 !fixtures/*/README.md
+!fixtures/phase-08/
+!fixtures/phase-08/*.json
 # Guard large files dropped directly at fixtures/ root
 fixtures/*.pdf
 fixtures/*.docx
