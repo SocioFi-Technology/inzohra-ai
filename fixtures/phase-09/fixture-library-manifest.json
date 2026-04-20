@@ -1,0 +1,246 @@
+{
+  "library_version": "phase-09-v1",
+  "description": "30-project fixture library for measurement regression testing",
+  "projects": [
+    {
+      "fixture_id": "dennis-ln-2008",
+      "address": "2008 Dennis Ln, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "vector",
+      "occupancy_class": "R-3",
+      "status": "complete"
+    },
+    {
+      "fixture_id": "oakland-broadway-stub",
+      "address": "1234 Broadway, Oakland, CA",
+      "jurisdiction": "oakland",
+      "pdf_quality_class": "hybrid",
+      "occupancy_class": "R-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-maple-stub",
+      "address": "450 Maple Ave, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "raster",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-elm-stub",
+      "address": "821 Elm St, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "low_quality_scan",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "oakland-lakeshore-stub",
+      "address": "3300 Lakeshore Ave, Oakland, CA",
+      "jurisdiction": "oakland",
+      "pdf_quality_class": "vector",
+      "occupancy_class": "R-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-cherry-stub",
+      "address": "110 Cherry Ln, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "hybrid",
+      "occupancy_class": "A-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-oak-stub",
+      "address": "675 Oak Dr, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "raster",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "oakland-telegraph-stub",
+      "address": "2200 Telegraph Ave, Oakland, CA",
+      "jurisdiction": "oakland",
+      "pdf_quality_class": "low_quality_scan",
+      "occupancy_class": "A-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-birch-stub",
+      "address": "309 Birch Ct, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "vector",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-willow-stub",
+      "address": "520 Willow Way, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "hybrid",
+      "occupancy_class": "R-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "oakland-grand-stub",
+      "address": "4410 Grand Ave, Oakland, CA",
+      "jurisdiction": "oakland",
+      "pdf_quality_class": "raster",
+      "occupancy_class": "R-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-pine-stub",
+      "address": "780 Pine St, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "low_quality_scan",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-cedar-stub",
+      "address": "102 Cedar Blvd, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "vector",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "oakland-fruitvale-stub",
+      "address": "3850 Fruitvale Ave, Oakland, CA",
+      "jurisdiction": "oakland",
+      "pdf_quality_class": "hybrid",
+      "occupancy_class": "R-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-redwood-stub",
+      "address": "1501 Redwood Dr, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "raster",
+      "occupancy_class": "A-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-spruce-stub",
+      "address": "64 Spruce Ave, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "low_quality_scan",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-magnolia-stub",
+      "address": "915 Magnolia Rd, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "vector",
+      "occupancy_class": "R-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "oakland-piedmont-stub",
+      "address": "1760 Piedmont Ave, Oakland, CA",
+      "jurisdiction": "oakland",
+      "pdf_quality_class": "low_quality_scan",
+      "occupancy_class": "R-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-walnut-stub",
+      "address": "233 Walnut St, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "hybrid",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-aspen-stub",
+      "address": "847 Aspen Ct, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "raster",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-poplar-stub",
+      "address": "319 Poplar Way, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "vector",
+      "occupancy_class": "A-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "oakland-macarthur-stub",
+      "address": "5201 MacArthur Blvd, Oakland, CA",
+      "jurisdiction": "oakland",
+      "pdf_quality_class": "vector",
+      "occupancy_class": "R-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-laurel-stub",
+      "address": "428 Laurel Ave, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "hybrid",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-sycamore-stub",
+      "address": "706 Sycamore Dr, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "raster",
+      "occupancy_class": "R-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "oakland-college-stub",
+      "address": "6100 College Ave, Oakland, CA",
+      "jurisdiction": "oakland",
+      "pdf_quality_class": "hybrid",
+      "occupancy_class": "A-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-hazel-stub",
+      "address": "173 Hazel St, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "low_quality_scan",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-cottonwood-stub",
+      "address": "540 Cottonwood Ln, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "vector",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "oakland-temescal-stub",
+      "address": "4020 Temescal Ave, Oakland, CA",
+      "jurisdiction": "oakland",
+      "pdf_quality_class": "raster",
+      "occupancy_class": "R-2",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "santa-rosa-alder-stub",
+      "address": "880 Alder Blvd, Santa Rosa, CA",
+      "jurisdiction": "santa_rosa",
+      "pdf_quality_class": "hybrid",
+      "occupancy_class": "R-3",
+      "status": "stub"
+    },
+    {
+      "fixture_id": "oakland-buckeye-stub",
+      "address": "995 Buckeye Rd, Oakland, CA",
+      "jurisdiction": "oakland",
+      "pdf_quality_class": "raster",
+      "occupancy_class": "A-2",
+      "status": "stub"
+    }
+  ]
+}
