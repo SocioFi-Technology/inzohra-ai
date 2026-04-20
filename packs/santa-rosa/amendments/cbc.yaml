@@ -1,0 +1,65 @@
+# Santa Rosa amendments to the 2022 California Building Code
+base_code: "CBC"
+pack_id: "santa-rosa-2022-v1"
+amendments:
+  - base_section: "CBC-R337.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      In addition to the requirements of Section R337, all new construction and substantial
+      improvements within Santa Rosa Fire Zone 3 boundaries as established by the Santa Rosa
+      Fire Department shall comply with Chapter 7A of the CBC for Wildland-Urban Interface
+      (WUI) construction regardless of lot size or parcel acreage. Contact the Santa Rosa Fire
+      Department at (707) 543-3500 or srfd.srcity.org for current Fire Zone 3 boundary maps.
+      Applicants shall provide a signed acknowledgment form (SRFD Form WUI-01) confirming
+      compliance with Fire Zone 3 requirements at time of permit application.
+
+  - base_section: "CBC-705.8"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Within Santa Rosa Fire Zone 3, all exterior wall openings (windows and doors) shall be
+      protected with dual-pane assemblies with tempered inner glazing or multi-pane assemblies
+      with at least one tempered pane, consistent with Chapter 7A Section 707A requirements.
+      Single-pane glazing in exterior walls is not permitted in Fire Zone 3 regardless of
+      fire-rating status of the wall assembly.
+
+  - base_section: "CBC-505.2"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Per Santa Rosa Municipal Code Title 18.10.020, mezzanines in residential occupancies
+      (Groups R-2 and R-3) shall not exceed one-third (1/3) of the floor area of the room
+      in which the mezzanine is located. The area beneath a mezzanine is included in the
+      floor area of the room where the mezzanine is located.
+
+  - base_section: "CBC-3109"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Swimming pool barrier and gate requirements shall comply with CBC Section 3109 and
+      the additional requirements of Santa Rosa Municipal Code Chapter 9.28. All new swimming
+      pools, spas, and hot tubs associated with residential construction shall be equipped
+      with a self-closing, self-latching gate with a latch release mechanism located on the
+      pool side of the gate, not less than 54 inches above grade.
+
+  - base_section: "CBC-1905.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Soft-story retrofit requirements apply to concrete and unreinforced masonry buildings
+      of three or more stories built prior to January 1, 1980 within the City of Santa Rosa.
+      Owners of such buildings shall comply with the Santa Rosa Soft-Story Retrofit Program
+      per Santa Rosa Municipal Code Title 18.62. Permit applications for alterations to
+      pre-1980 multi-story concrete or masonry buildings shall include a statement of
+      compliance or a retrofit engineering report stamped by a licensed structural engineer.
+
+  - base_section: "CBC-101.4"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      All permit applications within the City of Santa Rosa shall include a completed
+      Santa Rosa Planning Division Zoning Clearance form (Form PD-100) as a prerequisite
+      to Building Division acceptance. Applications lacking Planning Division clearance will
+      not be accepted. The Building Division does not waive zoning setback, lot coverage, or
+      height limit compliance as part of plan review.

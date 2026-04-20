@@ -1,0 +1,92 @@
+{
+  "template_id": "oakland-letter-2022",
+  "pack_id": "oakland-2022-v1",
+  "jurisdiction": "oakland",
+  "version": "2022-v1",
+  "effective_date": "2023-01-01",
+  "letterhead": {
+    "agency_name": "Oakland Building Services Division",
+    "agency_address": "250 Frank H. Ogawa Plaza, Suite 2340, Oakland, CA 94612",
+    "agency_phone": "(510) 238-3444",
+    "agency_email": "building@oaklandca.gov",
+    "agency_url": "https://www.oaklandca.gov/departments/building-services",
+    "reviewer_firm": "Bureau Veritas North America, Inc.",
+    "reviewer_firm_address": "1601 Response Rd, Suite 320, Sacramento, CA 95815",
+    "reviewer_firm_phone": "(916) 374-7400",
+    "logo_position": "top_left",
+    "secondary_logo_position": "top_right"
+  },
+  "typography": {
+    "font_family": "Calibri",
+    "font_size_body_pt": 11,
+    "font_size_heading_pt": 13,
+    "font_size_footer_pt": 9,
+    "line_spacing": 1.15
+  },
+  "page_layout": {
+    "paper_size": "letter",
+    "margin_top_in": 1.0,
+    "margin_bottom_in": 1.0,
+    "margin_left_in": 1.0,
+    "margin_right_in": 1.0,
+    "page_number_position": "bottom_right",
+    "page_number_format": "Page {n} of {total}"
+  },
+  "round_typography": {
+    "round_1": "italic",
+    "round_2": "bold",
+    "round_3": "underlined"
+  },
+  "header_block": {
+    "label_project": "Project:",
+    "label_address": "Project Address:",
+    "label_permit_number": "Permit Number:",
+    "label_applicant": "Applicant/Owner:",
+    "label_date": "Plan Check Date:",
+    "label_round": "Review Round:",
+    "label_bv_job": "BV Job No.:",
+    "label_reviewer": "Plan Check Engineer/Architect:"
+  },
+  "general_instructions_block": {
+    "include": true,
+    "text": "The following plan check comments are issued on behalf of the Oakland Building Services Division in accordance with the 2022 California Building Standards Code (Title 24) and applicable local amendments. All items must be addressed on revised drawings or in written responses prior to permit issuance. Please provide a written response to each comment identifying the sheet number, detail, or specification where the correction has been made. Plan check turnaround: Round 1 — 20 business days; Round 2+ — 15 business days. Resubmittal deadline: unresolved comments after 180 days from the plan check date may result in application expiration per Oakland Municipal Code Chapter 15.02.",
+    "resubmittal_instructions": "Resubmit via Oakland ePlans (etrakit.oaklandca.gov). Include a written response letter addressing each comment by item number. Electronic plan sets shall be submitted as single-file PDF with bookmarked sheets matching the sheet index."
+  },
+  "comment_format": {
+    "number_format": "{discipline_code}-{sequential:03d}",
+    "discipline_codes": {
+      "plan_integrity": "PI",
+      "architectural": "AR",
+      "accessibility": "ACC",
+      "structural": "ST",
+      "mechanical": "ME",
+      "electrical": "EL",
+      "plumbing": "PL",
+      "energy": "EN",
+      "fire_life_safety": "FL",
+      "calgreen": "CG"
+    },
+    "severity_prefix": {
+      "revise": "Revise",
+      "provide": "Provide",
+      "clarify": "Clarify",
+      "reference_only": "Reference Only"
+    },
+    "response_slot": {
+      "include": true,
+      "label": "Applicant Response:",
+      "lines": 3
+    }
+  },
+  "signature_block": {
+    "include": true,
+    "text": "This plan check letter was prepared on behalf of the Oakland Building Services Division by Bureau Veritas North America, Inc. Questions regarding these comments should be directed to the assigned plan check engineer/architect listed above. The Oakland Building Services Division remains the authority having jurisdiction over all matters related to permit issuance.",
+    "include_licensed_review_disclaimer": true,
+    "licensed_review_disclaimer": "Items flagged 'Requires Licensed Review' must be addressed by a licensed California architect, engineer, or other qualified licensed professional and are subject to final approval by the Oakland Building Services Division. Oakland Fire Prevention Bureau comments are issued separately and must also be resolved prior to permit issuance."
+  },
+  "footer": {
+    "left": "City of Oakland Building Services Division | Bureau Veritas North America, Inc.",
+    "center": "",
+    "right": "BV Job No.: {bv_job_number}"
+  }
+}

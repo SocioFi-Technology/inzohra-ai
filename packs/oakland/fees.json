@@ -1,0 +1,81 @@
+{
+  "fee_schedule_id": "oakland-fees-2023",
+  "pack_id": "oakland-2022-v1",
+  "jurisdiction": "oakland",
+  "effective_date": "2023-01-01",
+  "currency": "USD",
+  "source": "City of Oakland Master Fee Schedule FY2022-2023, Ordinance 13687",
+  "notes": "Fees are subject to annual CPI adjustment. Contact Oakland Building Services Division for current fee schedule before permit application. Oakland assesses a Technology Fee (2% of total permit fees) and an Affordable Housing Fee for projects over threshold.",
+  "plan_check": {
+    "basis": "valuation",
+    "sfr_new_construction": {
+      "description": "Plan check fee for new single-family dwelling",
+      "calculation": "70% of building permit fee",
+      "minimum_fee_usd": 400.00
+    },
+    "sfr_addition": {
+      "description": "Plan check fee for SFR addition or remodel",
+      "calculation": "70% of building permit fee",
+      "minimum_fee_usd": 200.00
+    },
+    "r2_multifamily": {
+      "description": "Plan check fee for new multi-family residential (R-2)",
+      "calculation": "70% of building permit fee",
+      "minimum_fee_usd": 1000.00
+    },
+    "adu_new": {
+      "description": "Plan check fee for new Accessory Dwelling Unit",
+      "flat_fee_usd": 0.00,
+      "notes": "ADU plan check fees waived per State law (AB 68). Standard permit fee applies."
+    },
+    "resubmittal_round_2": {
+      "description": "Resubmittal plan check fee (Round 2)",
+      "calculation": "50% of original plan check fee",
+      "minimum_fee_usd": 150.00
+    },
+    "resubmittal_round_3_plus": {
+      "description": "Resubmittal plan check fee (Round 3 and beyond)",
+      "calculation": "25% of original plan check fee per round",
+      "minimum_fee_usd": 100.00
+    }
+  },
+  "building_permit": {
+    "basis": "valuation",
+    "valuation_table": [
+      {"min_usd": 1, "max_usd": 500, "fee_usd": 32.00},
+      {"min_usd": 501, "max_usd": 2000, "fee_usd": 32.00, "per_additional_100_usd": 3.60, "over_usd": 500},
+      {"min_usd": 2001, "max_usd": 25000, "fee_usd": 86.00, "per_additional_1000_usd": 16.25, "over_usd": 2000},
+      {"min_usd": 25001, "max_usd": 50000, "fee_usd": 459.75, "per_additional_1000_usd": 11.80, "over_usd": 25000},
+      {"min_usd": 50001, "max_usd": 100000, "fee_usd": 754.75, "per_additional_1000_usd": 8.20, "over_usd": 50000},
+      {"min_usd": 100001, "max_usd": 500000, "fee_usd": 1164.75, "per_additional_1000_usd": 6.50, "over_usd": 100000},
+      {"min_usd": 500001, "max_usd": 1000000, "fee_usd": 3764.75, "per_additional_1000_usd": 5.10, "over_usd": 500000},
+      {"min_usd": 1000001, "max_usd": null, "fee_usd": 6314.75, "per_additional_1000_usd": 4.05, "over_usd": 1000000}
+    ]
+  },
+  "special_inspections": {
+    "description": "Special inspection program administrative fee",
+    "flat_fee_usd": 175.00
+  },
+  "state_surcharges": {
+    "bsas_surcharge_pct": 1.0,
+    "strong_motion_residential_usd": 0.013,
+    "strong_motion_commercial_usd": 0.021,
+    "green_fee_usd": 4.00
+  },
+  "fire_department_review": {
+    "sfr_sprinkler_13d_review_usd": 175.00,
+    "r2_nfpa13_fire_plan_check_usd": 500.00,
+    "fire_alarm_plan_check_usd": 350.00,
+    "fire_access_review_usd": 125.00
+  },
+  "technology_fee": {
+    "rate_pct": 2.0,
+    "basis": "total permit fees including plan check",
+    "description": "Oakland technology fee applied to all permits"
+  },
+  "inspection_fees": {
+    "standard_inspection_included": true,
+    "after_hours_inspection_per_hour_usd": 200.00,
+    "reinspection_usd": 125.00
+  }
+}

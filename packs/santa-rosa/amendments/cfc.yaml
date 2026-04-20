@@ -1,0 +1,58 @@
+# Santa Rosa amendments to the 2022 California Fire Code
+base_code: "CFC"
+pack_id: "santa-rosa-2022-v1"
+amendments:
+  - base_section: "CFC-315.3"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Within Santa Rosa, storage in Group R occupancies that is located in utility spaces,
+      under stairways, or in concealed spaces shall be limited to non-combustible materials
+      or shall be enclosed within a one-hour fire-resistance-rated construction assembly.
+      Santa Rosa Fire Department (SRFD) inspectors will verify compliance at final inspection.
+
+  - base_section: "CFC-503.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Fire apparatus access roads within Santa Rosa shall comply with the Santa Rosa Fire
+      Department Access Road Standards (SRFD Standards Chapter 5, as amended). Roads serving
+      three or more dwelling units shall have a minimum unobstructed width of 20 feet, a
+      minimum vertical clearance of 13 feet 6 inches, and an all-weather surface capable of
+      supporting a 75,000-pound fire apparatus. Dead-end access roads exceeding 150 feet in
+      length shall be provided with an approved turnaround per the Santa Rosa Fire Department
+      turnaround standards.
+
+  - base_section: "CFC-903.2.8"
+    operation: "replace"
+    effective_date: "2023-01-01"
+    text: >
+      An automatic fire sprinkler system complying with NFPA 13D shall be installed in
+      all new or substantially remodeled Group R-3 occupancies within the City of Santa Rosa.
+      Substantial remodel is defined as any alteration or addition that increases the gross
+      floor area by more than 50 percent or exceeds $100,000 in valuation (adjusted annually
+      per ENR Construction Cost Index). ADU requirements: see CRC Section R313.1 Santa Rosa
+      local amendment.
+
+  - base_section: "CFC-907.2.11"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Carbon monoxide alarms shall be installed in accordance with CRC Section R315 in all
+      dwelling units where any attached garage, gas appliance, or fuel-burning appliance is
+      present. In addition to the locations required by state code, Santa Rosa requires a
+      carbon monoxide alarm within 15 feet of the entrance to each room used for sleeping
+      purposes in all new construction. Combination smoke/CO alarms shall be listed and
+      labeled as meeting both UL 217 and UL 2034 requirements.
+
+  - base_section: "CFC-Appendix-B"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Santa Rosa has adopted Appendix B of the 2022 CFC in its entirety with the following
+      local modification: fire flow requirements for new construction in Santa Rosa Fire Zone 3
+      shall be increased by 25 percent above the values calculated per Table B105.1(2),
+      subject to a maximum of 3,500 gallons per minute (gpm). The increased fire flow
+      requirement reflects the elevated WUI fire risk within Fire Zone 3. Applicants shall
+      submit a fire flow availability letter from Sonoma Water confirming the available fire
+      flow at the nearest hydrant prior to permit issuance.

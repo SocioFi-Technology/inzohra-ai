@@ -1,0 +1,92 @@
+{
+  "template_id": "santa-rosa-letter-2022",
+  "pack_id": "santa-rosa-2022-v1",
+  "jurisdiction": "santa_rosa",
+  "version": "2022-v1",
+  "effective_date": "2023-01-01",
+  "letterhead": {
+    "agency_name": "Santa Rosa Building Division",
+    "agency_address": "90 Santa Rosa Ave, Santa Rosa, CA 95404",
+    "agency_phone": "(707) 543-3200",
+    "agency_email": "building@srcity.org",
+    "agency_url": "https://srcity.org/2188/Building-Permits",
+    "reviewer_firm": "Bureau Veritas North America, Inc.",
+    "reviewer_firm_address": "1601 Response Rd, Suite 320, Sacramento, CA 95815",
+    "reviewer_firm_phone": "(916) 374-7400",
+    "logo_position": "top_left",
+    "secondary_logo_position": "top_right"
+  },
+  "typography": {
+    "font_family": "Calibri",
+    "font_size_body_pt": 11,
+    "font_size_heading_pt": 13,
+    "font_size_footer_pt": 9,
+    "line_spacing": 1.15
+  },
+  "page_layout": {
+    "paper_size": "letter",
+    "margin_top_in": 1.0,
+    "margin_bottom_in": 1.0,
+    "margin_left_in": 0.875,
+    "margin_right_in": 0.875,
+    "page_number_position": "bottom_right",
+    "page_number_format": "Page {n} of {total}"
+  },
+  "round_typography": {
+    "round_1": "italic",
+    "round_2": "bold",
+    "round_3": "underlined"
+  },
+  "header_block": {
+    "label_project": "Project:",
+    "label_address": "Project Address:",
+    "label_permit_number": "Permit Number:",
+    "label_applicant": "Applicant:",
+    "label_date": "Plan Check Date:",
+    "label_round": "Review Round:",
+    "label_bv_job": "BV Job No.:",
+    "label_reviewer": "Plan Check Engineer/Architect:"
+  },
+  "general_instructions_block": {
+    "include": true,
+    "text": "The following plan check comments are issued on behalf of the Santa Rosa Building Division in accordance with the 2022 California Building Standards Code (Title 24) and applicable local amendments. All items must be addressed on revised drawings or in written responses prior to permit issuance. Please provide a written response to each comment identifying the sheet number, detail, or specification where the correction has been made. Plan check turnaround: Round 1 — 15 business days; Round 2+ — 10 business days.",
+    "resubmittal_instructions": "Resubmit two (2) sets of revised drawings and a written response letter to each comment. Electronic submittals accepted via the City of Santa Rosa ePlans portal."
+  },
+  "comment_format": {
+    "number_format": "{discipline_code}-{sequential:03d}",
+    "discipline_codes": {
+      "plan_integrity": "PI",
+      "architectural": "AR",
+      "accessibility": "ACC",
+      "structural": "ST",
+      "mechanical": "ME",
+      "electrical": "EL",
+      "plumbing": "PL",
+      "energy": "EN",
+      "fire_life_safety": "FL",
+      "calgreen": "CG"
+    },
+    "severity_prefix": {
+      "revise": "Revise",
+      "provide": "Provide",
+      "clarify": "Clarify",
+      "reference_only": "Reference Only"
+    },
+    "response_slot": {
+      "include": true,
+      "label": "Applicant Response:",
+      "lines": 3
+    }
+  },
+  "signature_block": {
+    "include": true,
+    "text": "This plan check letter was prepared on behalf of the Santa Rosa Building Division by Bureau Veritas North America, Inc. Questions regarding these comments should be directed to the assigned plan check engineer/architect listed above. The Santa Rosa Building Division remains the authority having jurisdiction over all matters related to permit issuance.",
+    "include_licensed_review_disclaimer": true,
+    "licensed_review_disclaimer": "Items flagged 'Requires Licensed Review' must be addressed by a licensed California architect, engineer, or other qualified licensed professional and are subject to final approval by the Santa Rosa Building Division."
+  },
+  "footer": {
+    "left": "City of Santa Rosa Building Division | Bureau Veritas North America, Inc.",
+    "center": "",
+    "right": "BV Job No.: {bv_job_number}"
+  }
+}

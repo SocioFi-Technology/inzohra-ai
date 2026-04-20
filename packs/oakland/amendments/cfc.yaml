@@ -1,0 +1,65 @@
+# Oakland amendments to the 2022 California Fire Code
+base_code: "CFC"
+pack_id: "oakland-2022-v1"
+amendments:
+  - base_section: "CFC-903.2.8"
+    operation: "replace"
+    effective_date: "2023-01-01"
+    text: >
+      An automatic fire sprinkler system complying with NFPA 13 shall be installed in all
+      new Group R-2 occupancy buildings within the City of Oakland, regardless of the
+      number of dwelling units, number of stories, or building height. This requirement is
+      more restrictive than the state code threshold. NFPA 13 systems shall be designed and
+      installed by an Oakland Fire Prevention Bureau-approved sprinkler contractor and shall
+      be inspected by the Oakland Fire Prevention Bureau prior to framing concealment. Plans
+      for NFPA 13 systems shall be submitted to and approved by the Oakland Fire Prevention
+      Bureau as a concurrent review with the building permit application.
+
+  - base_section: "CFC-507.5.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Fire hydrant placement for new multi-family residential (R-2) construction in Oakland
+      shall comply with the Oakland Fire Prevention Bureau Standards for Hydrant Spacing and
+      Placement. Hydrants shall be located within 300 feet of the main building entrance
+      (measured along the path of travel of fire apparatus) for buildings with a floor area
+      exceeding 5,000 sq ft. A fire flow availability letter from EBMUD (East Bay Municipal
+      Utility District) confirming available fire flow at the nearest hydrant shall be
+      submitted with the permit application for all new R-2 buildings.
+
+  - base_section: "CFC-907.2.9"
+    operation: "replace"
+    effective_date: "2023-01-01"
+    text: >
+      A fire alarm system per NFPA 72 shall be installed in all new Group R-2 occupancy
+      buildings in Oakland with three (3) or more dwelling units, regardless of the number
+      of stories. The fire alarm system shall include: (1) addressable initiating devices in
+      all units and common areas; (2) audible and visible notification appliances in common
+      corridors, stairways, and lobbies; (3) an addressable fire alarm control panel (FACP)
+      in a location approved by the Oakland Fire Prevention Bureau; (4) annunciator panel at
+      the main building entrance; and (5) connection to the Oakland Fire Prevention Bureau
+      central monitoring network where required. All fire alarm system submittals require
+      concurrent Oakland Fire Prevention Bureau review.
+
+  - base_section: "CFC-503.2"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Fire apparatus access roads for new multi-family construction in Oakland shall comply
+      with the Oakland Fire Prevention Bureau Access Road Standards. For new R-2 buildings
+      with more than 20 units, an approved secondary fire access point shall be provided
+      unless the primary fire access road serves the full building perimeter within 150 feet
+      of all exterior walls. The secondary access road shall be maintained in an unobstructed
+      state with all-weather paving capable of supporting a 75,000-pound vehicle.
+
+  - base_section: "CFC-315.3"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Oakland Tall Wood Building requirements: Where new construction proposes the use of
+      mass timber (cross-laminated timber, nail-laminated timber, or similar engineered wood
+      products) in buildings of four or more stories, the Oakland Building Services Division
+      requires concurrent review by the Oakland Fire Prevention Bureau prior to plan
+      acceptance. Mass timber fire protection requirements shall comply with CBC Chapter 6
+      Type IV construction requirements and NFPA 13 spray application requirements for
+      mass timber as applicable.

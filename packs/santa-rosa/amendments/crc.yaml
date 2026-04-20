@@ -1,0 +1,75 @@
+# Santa Rosa amendments to the 2022 California Residential Code
+base_code: "CRC"
+pack_id: "santa-rosa-2022-v1"
+amendments:
+  - base_section: "CRC-R302.2"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      In addition to the requirements of CRC Section R302.2, townhouses within Santa Rosa
+      Fire Zone 3 shall provide a two-hour fire-resistance-rated wall assembly between
+      units in lieu of the one-hour minimum required by state code, where the lot frontage
+      is less than 25 feet. This requirement supplements, and does not replace, the
+      requirements of Chapter 7A for WUI construction.
+
+  - base_section: "CRC-R310.2.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Egress window specifications shall be prominently called out on the floor plans and
+      the window schedule for all sleeping rooms. Santa Rosa Building Division requires a
+      dedicated egress-window compliance table on Sheet A (architectural) clearly identifying
+      each sleeping room window tag, the net clear opening width (inches), net clear opening
+      height (inches), net clear opening area (sq ft), sill height (inches above finish floor),
+      and applicable CRC code section. Submittal missing this table will be returned
+      incomplete without review.
+
+  - base_section: "CRC-R313.1"
+    operation: "replace"
+    effective_date: "2023-01-01"
+    text: >
+      An automatic residential fire sprinkler system shall be installed in all new one-
+      and two-family dwellings and townhouses in Santa Rosa. In addition, an NFPA 13D
+      automatic fire sprinkler system shall be installed in all new Accessory Dwelling
+      Units (ADUs) that meet any of the following conditions: (1) the ADU has a gross
+      floor area exceeding 500 square feet; (2) the ADU is attached to or shares a wall
+      with the primary dwelling; or (3) the ADU is located within Santa Rosa Fire Zone 3
+      regardless of size. Design and installation shall comply with NFPA 13D and the
+      Santa Rosa Fire Department Standards for Residential Sprinkler Systems (SRFD Memo
+      2020-03, as amended). This section supersedes CRC Section R313.1 for all projects
+      within the city limits of Santa Rosa.
+
+  - base_section: "CRC-R327.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      For properties within Santa Rosa Fire Zone 3, defensible space requirements shall
+      be noted on the site plan. Note shall read: "Owner/occupant shall maintain 100 feet
+      of defensible space (or to the property line, whichever is less) per California
+      Public Resources Code Section 4291 and the Santa Rosa Fire Department requirements.
+      Zone 1 (0-30 ft) and Zone 2 (30-100 ft) clearance shall be maintained in perpetuity."
+      The note shall reference the SRFD Defensible Space Inspection program.
+
+  - base_section: "CRC-R401.4"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      All new construction in areas identified on the Santa Rosa Liquefaction Hazard Zone
+      map (available from the City of Santa Rosa GIS portal) shall include a geotechnical
+      investigation report prepared by a licensed geotechnical engineer prior to plan
+      acceptance. The geotechnical report shall address liquefaction potential, expansive
+      soils, and bearing capacity, and shall include site-specific foundation design
+      recommendations. Foundation construction shall comply with the recommendations of
+      the approved geotechnical report.
+
+  - base_section: "CRC-R903.4"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Roof drainage systems for new construction and re-roofing projects within the City
+      of Santa Rosa shall be designed to discharge to an on-site infiltration system,
+      rain garden, or cistern where site conditions permit, in accordance with the Santa
+      Rosa Low Impact Development (LID) Design Manual. Where on-site infiltration is not
+      feasible (clay soils, slopes >15%, or proximity to structures), a written
+      geotechnical or civil engineering justification shall be provided with the permit
+      application.

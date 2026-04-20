@@ -1,0 +1,60 @@
+# Santa Rosa amendments to the 2022 California Plumbing Code
+base_code: "CPC"
+pack_id: "santa-rosa-2022-v1"
+amendments:
+  - base_section: "CPC-407.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      All new construction and remodels in the City of Santa Rosa that involve alteration
+      of interior plumbing shall install WaterSense-labeled lavatory faucets with a maximum
+      flow rate of 1.2 gallons per minute (gpm), showerheads with a maximum flow rate of
+      1.8 gpm, and gravity-flush toilets with a maximum flush volume of 1.28 gallons per
+      flush (gpf) dual-flush or 1.28 gpf single-flush. These requirements exceed the state
+      minimum and reflect the Santa Rosa Urban Water Management Plan conservation measures.
+
+  - base_section: "CPC-507.2"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Water heaters in the City of Santa Rosa shall be anchored or strapped to resist
+      horizontal displacement due to earthquake motion. Strapping shall be installed per
+      California Office of Emergency Services (Cal OES) guidelines: upper strap placed in
+      the upper one-third of the water heater and lower strap placed in the lower one-third.
+      Plans shall show the strap detail or reference a standard detail sheet. Flexible
+      gas connectors are required between the gas meter/shutoff and all gas-fired water
+      heater units.
+
+  - base_section: "CPC-609.2"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      The City of Santa Rosa requires whole-house water pressure regulators (pressure-reducing
+      valves, PRVs) on all new construction where the domestic water service pressure at the
+      meter exceeds 80 psi or where the supply main elevation difference exceeds 100 feet above
+      the lowest fixture. A pressure test result and PRV setting shall be noted on the plumbing
+      plans. PRV installation shall comply with CPC Section 609.2 and the Santa Rosa Public
+      Works Water Service Standards.
+
+  - base_section: "CPC-710.0"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Sewer lateral connections within the City of Santa Rosa shall comply with the
+      Santa Rosa Subregional Water Reclamation System (SRWRS) Standards for Sewer Lateral
+      Design and Construction. All new sewer laterals shall be 4 inches minimum diameter,
+      installed with a slope of not less than 1/4 inch per foot, and shall be tested with
+      a video inspection and pressure test prior to final plumbing approval. Video inspection
+      reports shall be submitted to the Building Division with the plumbing final inspection
+      request.
+
+  - base_section: "CPC-815.0"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Greywater reuse systems (laundry-to-landscape and branched drain systems) installed
+      within the City of Santa Rosa shall comply with CPC Appendix G and the Santa Rosa
+      Greywater Permit Program requirements. Laundry-to-landscape systems used for outdoor
+      irrigation shall include a minimum 12-inch mulch basin at each outlet. A site plan
+      showing discharge locations, plant species, and basin dimensions shall be included
+      with the plumbing permit application.

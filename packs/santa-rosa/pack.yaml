@@ -1,0 +1,29 @@
+pack_id: "santa-rosa-2022-v1"
+jurisdiction: "santa_rosa"
+version: "2022-v1"
+effective_date: "2023-01-01"
+superseded_by: null
+description: "Santa Rosa Building Division — 2022 California codes + local amendments (post-Tubbs Fire WUI, ADU sprinklers, soft-story retrofit, energy reach code)"
+agency: "City of Santa Rosa Building Division"
+county: "Sonoma County"
+state: "CA"
+code_cycle: "2022"
+base_codes:
+  - "CBC"
+  - "CRC"
+  - "CFC"
+  - "CMC"
+  - "CPC"
+  - "CEC"
+  - "CALGreen"
+contact:
+  name: "Santa Rosa Building Division"
+  address: "90 Santa Rosa Ave, Santa Rosa, CA 95404"
+  phone: "(707) 543-3200"
+  email: "building@srcity.org"
+  url: "https://srcity.org/2188/Building-Permits"
+review_rounds:
+  round_1_turnaround_business_days: 15
+  round_2_plus_turnaround_business_days: 10
+letter_agency_line: "Santa Rosa Building Division"
+bv_reviewer_block: true

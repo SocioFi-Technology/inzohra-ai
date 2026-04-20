@@ -1,0 +1,46 @@
+# Oakland amendments to the 2022 California Residential Code
+base_code: "CRC"
+pack_id: "oakland-2022-v1"
+amendments:
+  - base_section: "CRC-R313.1"
+    operation: "replace"
+    effective_date: "2023-01-01"
+    text: >
+      An automatic fire sprinkler system complying with NFPA 13D shall be installed in all
+      new one- and two-family dwellings and townhouses within the City of Oakland. All new
+      Accessory Dwelling Units (ADUs), regardless of size, shall be provided with an NFPA
+      13D sprinkler system when attached to or sharing a common wall with the primary
+      dwelling, or when the primary dwelling has an existing NFPA 13D system. Detached ADUs
+      of 750 square feet or less may be exempted from the NFPA 13D requirement upon written
+      approval from the Oakland Fire Prevention Bureau. This section supersedes CRC Section
+      R313.1 for all projects within the city limits of Oakland.
+
+  - base_section: "CRC-R401.4"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      For projects within the Oakland Liquefaction Hazard Zone or Alquist-Priolo Fault Zone
+      (as shown on maps available from the Oakland Planning Department GIS portal), a
+      geotechnical report is required prior to acceptance of any residential building permit
+      application. The report shall be prepared by a licensed geotechnical engineer and
+      shall address liquefaction mitigation, foundation type, and soil bearing capacity.
+
+  - base_section: "CRC-R802.4"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      For residential additions in Oakland that increase the heated floor area by more than
+      25 percent, the Oakland Building Services Division requires that the existing roof
+      structure be assessed by the licensed engineer of record for adequacy to carry the
+      combined gravity and seismic loads of the addition. A written engineer's assessment
+      shall be submitted with the permit application.
+
+  - base_section: "CRC-R302.2"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Oakland ADU fire separation requirements: Attached ADUs sharing a wall or floor/ceiling
+      assembly with the primary dwelling unit shall provide a minimum one-hour fire-resistance-
+      rated separation per CBC §420.2 (R-2 occupancy separation requirements), regardless
+      of the CRC prescriptive threshold, to address the higher density and mixed-occupancy
+      nature of infill development in Oakland.

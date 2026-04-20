@@ -1,0 +1,63 @@
+# Santa Rosa amendments to the 2022 CALGreen (California Green Building Standards Code)
+base_code: "CALGreen"
+pack_id: "santa-rosa-2022-v1"
+amendments:
+  - base_section: "CALGreen-4.201.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Santa Rosa has adopted the 2022 CALGreen Tier 1 measures as mandatory for all new
+      single-family residences and multi-family residential buildings of three stories or
+      fewer. Tier 1 compliance shall be documented on a completed CALGreen Tier 1 checklist
+      (available on the Santa Rosa Building Division website) submitted with the permit
+      application. The mandatory Tier 1 measures include reduced indoor water use (CALGreen
+      Section 4.303.1 Tier 1 values), enhanced waste diversion, and indoor air quality
+      measures.
+
+  - base_section: "CALGreen-4.303.1"
+    operation: "replace"
+    effective_date: "2023-01-01"
+    text: >
+      Santa Rosa mandatory indoor water use reduction requirements (superseding state
+      CALGreen baseline): All new residential construction shall achieve an aggregate
+      20 percent reduction in indoor potable water use compared to the California baseline
+      using the EPA WaterSense fixture and appliance values as the baseline. Fixtures shall
+      comply with the following maximum flow rates: lavatory faucets 1.2 gpm, kitchen
+      faucets 1.5 gpm, showerheads 1.8 gpm, toilets 1.28 gpf, urinals 0.125 gpf. A
+      WaterSense fixture compliance table shall be included on the plumbing plans listing
+      each fixture type, fixture model, and flow rate.
+
+  - base_section: "CALGreen-4.408.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      In addition to the state CALGreen waste diversion requirement of 65 percent, Santa Rosa
+      requires that Construction Waste Management Plans (CWMPs) identify a minimum of two
+      local certified C&D recycling facilities within 20 miles of the project site. The
+      CWMP shall include the name, address, phone number, and certification number of each
+      facility. Upon project completion, a Construction Waste Diversion Report documenting
+      actual waste generated and diverted shall be submitted to the Building Division before
+      final inspection.
+
+  - base_section: "CALGreen-4.503.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Fireplaces, wood stoves, and pellet stoves in new construction within the City of
+      Santa Rosa shall comply with CALGreen Section 4.503.1 and the additional requirements
+      of the Bay Area Air Quality Management District (BAAQMD) Regulation 6, Rule 3. Only
+      EPA-certified wood-burning devices with an emission rate not exceeding 2.0 grams per
+      hour of particulate matter are permitted in new construction. Natural-gas-only fireplaces
+      are the preferred alternative for new construction.
+
+  - base_section: "CALGreen-4.106.3"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Santa Rosa local stormwater management requirement: all new residential construction
+      with a disturbed area of 2,500 square feet or more shall include a Low Impact
+      Development (LID) stormwater management plan. The LID plan shall be consistent with
+      the Santa Rosa LID Design Manual and shall demonstrate compliance with the City's
+      Municipal Regional Stormwater Permit (MRP) requirements. The LID plan shall be
+      submitted with the permit application and is subject to review by the Santa Rosa
+      Department of Public Works prior to Building Division acceptance.

@@ -1,0 +1,58 @@
+# Santa Rosa amendments to the 2022 California Electrical Code
+base_code: "CEC"
+pack_id: "santa-rosa-2022-v1"
+amendments:
+  - base_section: "CEC-210.52"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      In addition to the CEC requirements for receptacle outlets in dwelling units, all new
+      single-family dwellings and ADUs within the City of Santa Rosa shall provide a minimum
+      of one dedicated 240-volt, 50-ampere circuit (NEMA 14-50 receptacle or EVSE outlet)
+      in the garage or at the primary off-street parking space for electric vehicle (EV)
+      charging. This requirement applies regardless of whether an electric vehicle is
+      currently owned by the occupant, consistent with the Santa Rosa CARP EV readiness
+      mandate.
+
+  - base_section: "CEC-230.42"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      All new service entrances and panel upgrades in the City of Santa Rosa shall be sized
+      to accommodate full electrification of the dwelling unit. The minimum service size for
+      new single-family dwellings shall be 200 amperes at 240 volts single-phase, or as
+      required by the load calculation per CEC Article 220, whichever is larger. Panel
+      schedules submitted for permit shall show capacity (amperes) reserved for future heat
+      pump HVAC, heat pump water heater, EV charging, and induction cooking.
+
+  - base_section: "CEC-314.27"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Outlet boxes for ceiling-mounted luminaires in all rooms of new residential construction
+      shall be rated for the support of ceiling fan assemblies per CEC Section 314.27(D),
+      regardless of whether a ceiling fan is specified. Electrical plans shall include a note
+      confirming fan-rated box specification in all rooms with ceiling-mounted light outlets.
+
+  - base_section: "CEC-408.4"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Panel schedules for new service installations in Santa Rosa shall include: (1) circuit
+      number, (2) breaker size in amperes, (3) conductor size (AWG), (4) load description,
+      (5) calculated load in watts or volt-amperes, and (6) designation of circuits reserved
+      for future all-electric appliances. Submittals lacking complete panel schedules will
+      not be accepted.
+
+  - base_section: "CEC-690.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Photovoltaic (PV) systems installed within Santa Rosa shall comply with CEC Article 690
+      and the additional requirements of the Santa Rosa Solar Permit Program. All PV
+      installations shall provide: (1) a roof plan showing panel layout with setbacks from
+      roof edges, ridges, hips, and valleys per Title 19 fire access requirements; (2) a
+      single-line electrical diagram; (3) a String sizing and inverter data sheet; and (4)
+      structural analysis confirming the existing roof structure can support the PV load.
+      Permits for rooftop PV on buildings within Fire Zone 3 require SRFD review prior to
+      Building Division issuance.

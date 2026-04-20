@@ -1,0 +1,210 @@
+{
+  "checklist_id": "oakland-sfr-2022",
+  "pack_id": "oakland-2022-v1",
+  "occupancy_class": "R-3",
+  "version": "2022-v1",
+  "effective_date": "2023-01-01",
+  "description": "Single-Family Residential (Group R-3) submittal checklist for the City of Oakland, based on 2022 California Building Code cycle.",
+  "items": [
+    {
+      "item_id": "oak-sfr-001",
+      "category": "Site",
+      "description": "Plot plan showing property lines, setbacks, existing and proposed improvements, north arrow, and scale",
+      "required": true,
+      "code_ref": "CBC-107.2",
+      "notes": "Show adjacent structures within 10 feet of property lines. Include APN and legal description."
+    },
+    {
+      "item_id": "oak-sfr-002",
+      "category": "Site",
+      "description": "Oakland Planning Department clearance or approval number noted on the application cover sheet",
+      "required": true,
+      "code_ref": "CBC-101.4-OAK-amendment",
+      "notes": "Required before Building Services Division acceptance. Design Review approval required for projects exceeding 2,500 sqft new construction."
+    },
+    {
+      "item_id": "oak-sfr-003",
+      "category": "Site",
+      "description": "Geotechnical investigation report for sites within Liquefaction Hazard Zone or Alquist-Priolo Fault Zone",
+      "required": false,
+      "code_ref": "CRC-R401.4-OAK-amendment",
+      "notes": "Required if site falls within Oakland hazard zones per Planning Department GIS portal."
+    },
+    {
+      "item_id": "oak-sfr-004",
+      "category": "Site",
+      "description": "Grading and drainage plan with existing and proposed grades, finish floor elevation, and drainage flow direction",
+      "required": true,
+      "code_ref": "CBC-1804.1",
+      "notes": "Must be signed by licensed civil engineer or surveyor where grading exceeds 50 cubic yards."
+    },
+    {
+      "item_id": "oak-sfr-005",
+      "category": "Site",
+      "description": "Accessible parking stall with dimensions, slope, and route to building entrance (if off-street parking is provided)",
+      "required": false,
+      "code_ref": "CBC-11B-502.2",
+      "notes": "Required if parking is provided. One accessible stall per parking lot up to 25 total stalls."
+    },
+    {
+      "item_id": "oak-sfr-006",
+      "category": "Foundation",
+      "description": "Foundation plan with type, dimensions, reinforcement, and anchor bolt layout",
+      "required": true,
+      "code_ref": "CRC-R403.1",
+      "notes": "Minimum 3.5-inch slab thickness. Include post-tension design by licensed engineer if applicable."
+    },
+    {
+      "item_id": "oak-sfr-007",
+      "category": "Foundation",
+      "description": "Anchor bolt schedule: minimum 1/2-inch diameter at 6-foot maximum spacing with 3x3x1/4-inch plate washers in SDC D",
+      "required": true,
+      "code_ref": "CRC-R403.1.6",
+      "notes": "Oakland Seismic Design Category D. Plate washers required at all anchor bolts."
+    },
+    {
+      "item_id": "oak-sfr-008",
+      "category": "Framing",
+      "description": "Floor plan(s) with all rooms labeled, dimensioned, and door/window tags keyed to schedules",
+      "required": true,
+      "code_ref": "CBC-107.2.1",
+      "notes": "Minimum 1/8-inch scale. ADU floor plans (if applicable) on separate sheets."
+    },
+    {
+      "item_id": "oak-sfr-009",
+      "category": "Framing",
+      "description": "Roof framing or truss layout plan with member sizes, species/grade, spacing, and spans",
+      "required": true,
+      "code_ref": "CRC-R802.4",
+      "notes": "Truss manufacturer sealed drawings required at permit issuance."
+    },
+    {
+      "item_id": "oak-sfr-010",
+      "category": "Framing",
+      "description": "Shear wall schedule and layout plan with hold-down product numbers and locations",
+      "required": true,
+      "code_ref": "CRC-R602.10",
+      "notes": "Include ICC-ES evaluation report number for all hold-down hardware."
+    },
+    {
+      "item_id": "oak-sfr-011",
+      "category": "Framing",
+      "description": "Building sections (min. 2) and exterior elevations (all 4 sides) with finish material and height dimensions",
+      "required": true,
+      "code_ref": "CBC-107.2.1",
+      "notes": "Oakland Zoning maximum height per OMC Chapter 17. Include shadow study for hillside projects."
+    },
+    {
+      "item_id": "oak-sfr-012",
+      "category": "Fire",
+      "description": "NFPA 13D automatic fire sprinkler system plans or concurrent deferred submittal pre-approval from Oakland Fire Prevention Bureau",
+      "required": true,
+      "code_ref": "CRC-R313.1-OAK-amendment",
+      "notes": "Required for all new SFR in Oakland. Oakland FPB concurrent review required."
+    },
+    {
+      "item_id": "oak-sfr-013",
+      "category": "Fire",
+      "description": "Smoke alarm locations on all floor plans, hard-wired and interconnected with battery backup",
+      "required": true,
+      "code_ref": "CRC-R314.3",
+      "notes": "Required in each sleeping room, outside sleeping areas, and on each story."
+    },
+    {
+      "item_id": "oak-sfr-014",
+      "category": "Fire",
+      "description": "Carbon monoxide alarm locations shown on floor plans",
+      "required": true,
+      "code_ref": "CRC-R315",
+      "notes": "Required within 15 feet of each sleeping room where any gas appliance or attached garage is present."
+    },
+    {
+      "item_id": "oak-sfr-015",
+      "category": "Mechanical",
+      "description": "Mechanical plans showing all HVAC equipment locations, duct routing, and equipment schedule with CFM and efficiency ratings",
+      "required": true,
+      "code_ref": "CMC-301.2",
+      "notes": "All-electric HVAC strongly preferred per Oakland Equitable Climate Action Plan (ECAP). Gas heating requires written justification."
+    },
+    {
+      "item_id": "oak-sfr-016",
+      "category": "Mechanical",
+      "description": "Kitchen and bathroom exhaust ventilation with CFM rates, duct routing, and exterior termination",
+      "required": true,
+      "code_ref": "CMC-402.0",
+      "notes": "Kitchen minimum 100 CFM. Bathroom minimum 50 CFM or 110 CFM intermittent per ASHRAE 62.2."
+    },
+    {
+      "item_id": "oak-sfr-017",
+      "category": "Electrical",
+      "description": "Electrical floor plan with panel location, circuit layout, outlet locations, AFCI/GFCI designations",
+      "required": true,
+      "code_ref": "CEC-210.52",
+      "notes": "Clearly label AFCI protected circuits (all habitable rooms) and GFCI protected locations."
+    },
+    {
+      "item_id": "oak-sfr-018",
+      "category": "Electrical",
+      "description": "Panel schedule with circuit numbers, breaker sizes, conductor sizes, loads, and reserved capacity for future all-electric appliances",
+      "required": true,
+      "code_ref": "CEC-408.4",
+      "notes": "Minimum 200-amp service for new SFR per Oakland local amendment."
+    },
+    {
+      "item_id": "oak-sfr-019",
+      "category": "Electrical",
+      "description": "EV-ready charging infrastructure: dedicated 240V/50A circuit at garage or primary parking space",
+      "required": true,
+      "code_ref": "CEC-210.52-OAK",
+      "notes": "Required per Title 24 Part 6 solar/EV readiness and Oakland ECAP. NEMA 14-50 or listed EVSE."
+    },
+    {
+      "item_id": "oak-sfr-020",
+      "category": "Energy",
+      "description": "CF-1R Certificate of Compliance (CalCERTS or CHEERS registered) included with plan set as a named sheet",
+      "required": true,
+      "code_ref": "T24-P6-10-103(a)(1)",
+      "notes": "Registration number and date printed on document. Must match all insulation/window values on plans."
+    },
+    {
+      "item_id": "oak-sfr-021",
+      "category": "Energy",
+      "description": "Solar PV-ready conduit pathway and reserved breaker noted on electrical plans",
+      "required": true,
+      "code_ref": "T24-P6-110.10(a)",
+      "notes": "Minimum 1-inch conduit from main panel to attic/roof. Reserved breaker labeled 'Solar PV — Future'."
+    },
+    {
+      "item_id": "oak-sfr-022",
+      "category": "Plumbing",
+      "description": "Plumbing plan and isometric with all supply, DWV lines, and fixture unit count per CPC",
+      "required": true,
+      "code_ref": "CPC-301.2",
+      "notes": "Show sewer lateral connection with 4-inch minimum diameter and minimum 1/4 inch per foot slope."
+    },
+    {
+      "item_id": "oak-sfr-023",
+      "category": "Plumbing",
+      "description": "WaterSense fixture compliance table listing all fixtures with flow rates meeting Oakland requirements",
+      "required": true,
+      "code_ref": "CALGreen-4.303.1",
+      "notes": "Oakland adopts CALGreen Tier 1 as mandatory: lavatory 1.2 gpm, shower 1.8 gpm, toilet 1.28 gpf."
+    },
+    {
+      "item_id": "oak-sfr-024",
+      "category": "CALGreen",
+      "description": "CALGreen mandatory checklist (Oakland adopts Tier 1 as mandatory baseline) signed by designer",
+      "required": true,
+      "code_ref": "CALGreen-4.201.1",
+      "notes": "Oakland Building Services Division accepts the state CALGreen Tier 1 checklist form."
+    },
+    {
+      "item_id": "oak-sfr-025",
+      "description": "Construction Waste Management Plan with 65 percent minimum diversion from landfill",
+      "required": true,
+      "category": "CALGreen",
+      "code_ref": "CALGreen-4.408.1",
+      "notes": "Identify recycling facilities and haulers. Post-construction Diversion Report required before final."
+    }
+  ]
+}

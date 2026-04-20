@@ -1,0 +1,29 @@
+pack_id: "oakland-2022-v1"
+jurisdiction: "oakland"
+version: "2022-v1"
+effective_date: "2023-01-01"
+superseded_by: null
+description: "Oakland Building Services Division — 2022 California codes + local amendments (NFPA 13 sprinklers in all R-2, all-electric reach code, EV charging, 20-day Round 1 turnaround)"
+agency: "City of Oakland Building Services Division"
+county: "Alameda County"
+state: "CA"
+code_cycle: "2022"
+base_codes:
+  - "CBC"
+  - "CRC"
+  - "CFC"
+  - "CMC"
+  - "CPC"
+  - "CEC"
+  - "CALGreen"
+contact:
+  name: "Oakland Building Services Division"
+  address: "250 Frank H. Ogawa Plaza, Suite 2340, Oakland, CA 94612"
+  phone: "(510) 238-3444"
+  email: "building@oaklandca.gov"
+  url: "https://www.oaklandca.gov/departments/building-services"
+review_rounds:
+  round_1_turnaround_business_days: 20
+  round_2_plus_turnaround_business_days: 15
+letter_agency_line: "Oakland Building Services Division"
+bv_reviewer_block: true

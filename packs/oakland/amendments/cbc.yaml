@@ -1,0 +1,73 @@
+# Oakland amendments to the 2022 California Building Code
+base_code: "CBC"
+pack_id: "oakland-2022-v1"
+amendments:
+  - base_section: "CBC-903.2.8"
+    operation: "replace"
+    effective_date: "2023-01-01"
+    text: >
+      An automatic fire sprinkler system complying with NFPA 13 shall be installed in all
+      new Group R-2 (multi-family residential) buildings within the City of Oakland,
+      regardless of the number of stories or dwelling units. This requirement supersedes
+      any state-code threshold. The sprinkler system design, installation, and inspection
+      shall comply with NFPA 13 (current edition as adopted by the Oakland Fire Prevention
+      Bureau) and Oakland Fire Prevention Bureau Standards for Multi-Family Residential
+      Sprinkler Systems. Deferred submittal of sprinkler plans is permitted with written
+      Oakland Fire Prevention Bureau pre-approval.
+
+  - base_section: "CBC-1006.3"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      In addition to the state requirements, all new multi-family residential buildings
+      in Oakland of four or more stories shall provide a minimum of two (2) accessible
+      routes of travel from the public way to the main building entrance at grade, where
+      topography and site geometry permit. Where only one accessible route is feasible, the
+      applicant shall provide a written justification stamped by the licensed engineer of
+      record, subject to approval by the Oakland Building Services Division.
+
+  - base_section: "CBC-420.6"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Oakland Seismic Hazard Zone requirements: All new construction and substantial
+      additions on parcels identified in the Alquist-Priolo Earthquake Fault Zone, the
+      Oakland Liquefaction Hazard Zone, or the Oakland Landslide Hazard Zone shall include
+      a geotechnical investigation report prepared and stamped by a California-licensed
+      geotechnical engineer. The geotechnical report shall be submitted with the permit
+      application and shall be reviewed and approved by the Oakland Building Services
+      Division prior to plan acceptance. The geotechnical report shall address site-specific
+      hazard mitigation measures and foundation design recommendations.
+
+  - base_section: "CBC-1608.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Oakland Soft-Story Retrofit Ordinance: All wood-frame multi-story residential
+      buildings with soft, weak, or open-front stories built prior to January 1, 1978 and
+      containing five or more dwelling units shall comply with the Oakland Soft-Story Retrofit
+      Program per Oakland Municipal Code Chapter 15.27. Permit applications for alterations,
+      additions, or change of occupancy affecting pre-1978 soft-story buildings shall include
+      documentation of current retrofit status or a licensed structural engineer's assessment.
+
+  - base_section: "CBC-101.4"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Oakland Planning and Building coordination: All new construction, substantial
+      alterations, and additions requiring an Oakland Building Permit shall include a
+      verified Planning Department clearance prior to Building Services Division acceptance.
+      For projects subject to Design Review or Conditional Use Permit, Planning approval
+      shall be obtained and the approval number noted on the building permit application
+      before the application can be accepted for plan review.
+
+  - base_section: "CBC-1705.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Special inspection and structural observation requirements for buildings in Oakland
+      over three (3) stories: A comprehensive Special Inspection Program (SIP) shall be
+      submitted with the building permit application for all new multi-story residential
+      buildings of four or more stories. The SIP shall include the Statement of Special
+      Inspections per CBC §1705.3 and identify the project-specific special inspection
+      coordinator registered with Oakland Building Services Division.

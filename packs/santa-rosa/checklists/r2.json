@@ -1,0 +1,186 @@
+{
+  "checklist_id": "santa-rosa-r2-2022",
+  "pack_id": "santa-rosa-2022-v1",
+  "occupancy_class": "R-2",
+  "version": "2022-v1",
+  "effective_date": "2023-01-01",
+  "description": "Multi-Family Residential (Group R-2) submittal checklist for the City of Santa Rosa, based on 2022 California Building Code cycle.",
+  "items": [
+    {
+      "item_id": "r2-001",
+      "category": "Site",
+      "description": "Plot plan with property lines, setbacks, easements, north arrow, and scale at minimum 1 inch = 20 feet",
+      "required": true,
+      "code_ref": "CBC-107.2",
+      "notes": "Show adjacent structures, rights-of-way, alleys, and all existing improvements."
+    },
+    {
+      "item_id": "r2-002",
+      "category": "Site",
+      "description": "Accessible parking stall layout with dimensions, slope, and accessible route to building entrance",
+      "required": true,
+      "code_ref": "CBC-11B-502.2",
+      "notes": "Accessible van stall required for every 6 accessible spaces. Cross-slope max 2% in any direction."
+    },
+    {
+      "item_id": "r2-003",
+      "category": "Site",
+      "description": "Santa Rosa Planning Division Zoning Clearance (Form PD-100) attached to application",
+      "required": true,
+      "code_ref": "CBC-101.4-SR-amendment",
+      "notes": "Planning clearance required before Building Division acceptance."
+    },
+    {
+      "item_id": "r2-004",
+      "category": "Site",
+      "description": "WUI / Fire Zone 3 determination from SRFD, or documentation that property is outside Fire Zone 3",
+      "required": true,
+      "code_ref": "CBC-R337.1-SR-amendment",
+      "notes": "Required for all new construction regardless of parcel size."
+    },
+    {
+      "item_id": "r2-005",
+      "category": "Fire",
+      "description": "Automatic fire sprinkler system plans (NFPA 13 full system) or deferred submittal notation with SRFD pre-approval",
+      "required": true,
+      "code_ref": "CBC-903.2.8",
+      "notes": "R-2 occupancies require NFPA 13 (not 13D) full fire sprinkler system."
+    },
+    {
+      "item_id": "r2-006",
+      "category": "Fire",
+      "description": "Fire alarm system plans per NFPA 72 showing device locations, wiring, control panel, and annunciator panel",
+      "required": true,
+      "code_ref": "CBC-907.2.9",
+      "notes": "R-2 buildings with more than 16 occupants require full fire alarm system with voice evacuation in common areas."
+    },
+    {
+      "item_id": "r2-007",
+      "category": "Fire",
+      "description": "Fire-rated corridor and exit stair construction details including assembly rating, door/frame ratings, and hardware",
+      "required": true,
+      "code_ref": "CBC-1020.1",
+      "notes": "Corridors serving 10+ occupants require 1-hour rated construction. Stair enclosures per CBC-1023."
+    },
+    {
+      "item_id": "r2-008",
+      "category": "Fire",
+      "description": "Occupancy separation details where R-2 is mixed with other occupancies (podium, parking, commercial)",
+      "required": false,
+      "code_ref": "CBC-508.4",
+      "notes": "Required for mixed-occupancy buildings. Include separation table per CBC Table 508.4."
+    },
+    {
+      "item_id": "r2-009",
+      "category": "Framing",
+      "description": "Complete structural framing plans and sections including gravity and lateral system",
+      "required": true,
+      "code_ref": "CBC-107.2",
+      "notes": "Soft-story retrofit documentation required for pre-1980 concrete/masonry buildings per Santa Rosa local amendment."
+    },
+    {
+      "item_id": "r2-010",
+      "category": "Framing",
+      "description": "Structural engineer of record wet stamp on all structural sheets",
+      "required": true,
+      "code_ref": "CBC-1603.1",
+      "notes": "Licensed California PE or SE required for R-2 buildings of any height."
+    },
+    {
+      "item_id": "r2-011",
+      "category": "Framing",
+      "description": "Special inspection program (SIP) listing all required special inspections and inspector qualifications",
+      "required": true,
+      "code_ref": "CBC-1705.1",
+      "notes": "Required for buildings over 3 stories or using engineered wood products, HSS columns, or post-tensioned slabs."
+    },
+    {
+      "item_id": "r2-012",
+      "category": "Accessibility",
+      "description": "Accessible unit matrix showing compliant Type A (fully accessible) and Type B (adaptable) unit counts and locations",
+      "required": true,
+      "code_ref": "CBC-11A-101.3",
+      "notes": "Type A: 10% of ground-floor units or all elevator-served units. Type B: all multi-family units on accessible routes."
+    },
+    {
+      "item_id": "r2-013",
+      "category": "Accessibility",
+      "description": "Type A unit plans at 1/4-inch scale showing turning spaces, reach ranges, accessible kitchen, and bathroom layouts",
+      "required": true,
+      "code_ref": "CBC-11A-603",
+      "notes": "60-inch turning circle in bathrooms. 36-inch minimum clear floor space at all appliances."
+    },
+    {
+      "item_id": "r2-014",
+      "category": "Accessibility",
+      "description": "Common area accessibility plans including lobbies, mailrooms, laundry rooms, and recreation areas",
+      "required": true,
+      "code_ref": "CBC-11B-206.2",
+      "notes": "All common-use areas must be on accessible route. Include elevator cab dimensions where provided."
+    },
+    {
+      "item_id": "r2-015",
+      "category": "Mechanical",
+      "description": "Mechanical plans and equipment schedule for all units and common areas",
+      "required": true,
+      "code_ref": "CMC-301.2",
+      "notes": "All-electric HVAC preferred per Santa Rosa CARP. Unit-by-unit and common-area systems to be shown."
+    },
+    {
+      "item_id": "r2-016",
+      "category": "Mechanical",
+      "description": "Kitchen and bathroom exhaust fan schedule with CFM rates and duct routing to exterior",
+      "required": true,
+      "code_ref": "CMC-402.0",
+      "notes": "Per ASHRAE 62.2, bathroom fans: 50 CFM continuous or 110 CFM intermittent. Kitchen: 200 CFM intermittent."
+    },
+    {
+      "item_id": "r2-017",
+      "category": "Electrical",
+      "description": "Site electrical plan showing main service, distribution panels, EV charging provisions, and exterior lighting",
+      "required": true,
+      "code_ref": "CEC-230.42-SR-amendment",
+      "notes": "EV charging infrastructure required for all multi-family parking per Title 24 Part 6 and Santa Rosa CARP."
+    },
+    {
+      "item_id": "r2-018",
+      "category": "Electrical",
+      "description": "Panel schedules for main distribution panel and all unit sub-panels",
+      "required": true,
+      "code_ref": "CEC-408.4",
+      "notes": "Show reserved capacity for future all-electric appliances per Santa Rosa local amendment."
+    },
+    {
+      "item_id": "r2-019",
+      "category": "Energy",
+      "description": "CF-1R Certificate of Compliance for multi-family residential construction (HERS registered)",
+      "required": true,
+      "code_ref": "T24-P6-10-103(a)(1)",
+      "notes": "Separate CF-1R may be required per unit type (floor plan type A, B, C, etc.)."
+    },
+    {
+      "item_id": "r2-020",
+      "category": "Energy",
+      "description": "Energy efficiency measures checklist including insulation, windows, water heating, and lighting power density",
+      "required": true,
+      "code_ref": "T24-P6-150.0",
+      "notes": "Photovoltaic (solar) system required for new R-2 buildings per Title 24 Part 6 Section 150.1(c)."
+    },
+    {
+      "item_id": "r2-021",
+      "category": "CALGreen",
+      "description": "CALGreen Tier 1 mandatory checklist for multi-family residential (Santa Rosa requirement)",
+      "required": true,
+      "code_ref": "CALGreen-4.201.1-SR-amendment",
+      "notes": "Tier 1 mandatory for all new multi-family construction in Santa Rosa."
+    },
+    {
+      "item_id": "r2-022",
+      "category": "CALGreen",
+      "description": "Construction Waste Management Plan with minimum two local C&D recycling facilities identified",
+      "required": true,
+      "code_ref": "CALGreen-4.408.1-SR-amendment",
+      "notes": "65% minimum diversion required. Post-construction Diversion Report required before final."
+    }
+  ]
+}

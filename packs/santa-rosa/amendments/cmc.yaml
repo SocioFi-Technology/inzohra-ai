@@ -1,0 +1,56 @@
+# Santa Rosa amendments to the 2022 California Mechanical Code
+base_code: "CMC"
+pack_id: "santa-rosa-2022-v1"
+amendments:
+  - base_section: "CMC-504.3"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      In Santa Rosa, clothes dryer exhaust ducts shall be constructed of rigid metallic
+      duct (no flexible metallic foil duct) for the full run from the appliance to the
+      exterior termination. Maximum duct length shall be 35 feet less 2.5 feet for each
+      90-degree elbow, consistent with CMC Section 504.3.1 and Santa Rosa Building Division
+      Policy BD-M-01. Duct length calculation shall be shown on the mechanical plans.
+
+  - base_section: "CMC-701.1"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      All new HVAC systems in Group R-2 and R-3 occupancies within the City of Santa Rosa
+      shall be designed and installed as all-electric systems (heat pump heating and cooling)
+      to support Santa Rosa's Climate Action and Resilience Plan (CARP) goals. Gas-fired
+      furnaces and gas heat pump systems are not permitted in new construction on parcels
+      where natural gas infrastructure is not currently provided. Where a gas connection
+      exists, applicants wishing to install gas heating shall submit a written justification
+      acceptable to the Building Division.
+
+  - base_section: "CMC-904.11"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Commercial kitchen hood systems serving restaurants and food service establishments
+      in Santa Rosa shall comply with CMC Section 904 and the additional requirements of
+      the Santa Rosa Fire Department Commercial Kitchen Hood Inspection Program. Type I
+      hoods shall be provided with an UL 300 listed automatic fire suppression system.
+      All hood installations shall be inspected by SRFD prior to final inspection by the
+      Building Division.
+
+  - base_section: "CMC-308.4"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Mechanical equipment located within Santa Rosa Fire Zone 3 and accessible from the
+      exterior (condensing units, air handlers, etc.) shall be protected from ember
+      intrusion by corrosion-resistant screening with openings no larger than 1/8-inch in
+      accordance with CBC Chapter 7A Section 708A. Equipment screens shall be noted on the
+      mechanical plans and referenced on the site plan.
+
+  - base_section: "CMC-1204.3"
+    operation: "append"
+    effective_date: "2023-01-01"
+    text: >
+      Hydronic heating systems in new residential construction shall be designed for a
+      supply water temperature not exceeding 130°F at design conditions, enabling
+      compatibility with heat pump water heater sources per the Santa Rosa reach code
+      requirements. The design supply temperature shall be documented on the mechanical
+      plans.
