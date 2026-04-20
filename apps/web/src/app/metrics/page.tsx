@@ -39,8 +39,29 @@ interface ShadowRow {
   created_at: string;
 }
 
-async function fetchRules(): Promise<RuleRow[]> {
+const JURISDICTIONS = [
+  { value: "", label: "All" },
+  { value: "santa_rosa", label: "Santa Rosa" },
+  { value: "oakland", label: "Oakland" },
+] as const;
+
+async function fetchRules(jurisdiction: string): Promise<RuleRow[]> {
   try {
+    if (jurisdiction) {
+      const res = await pool.query<RuleRow>(
+        `SELECT rml.rule_id, rml.discipline,
+                COALESCE(rml.total_findings, 0)::int  AS total_findings,
+                COALESCE(rml.matched, 0)::int          AS matched,
+                COALESCE(rml.false_positives, 0)::int  AS false_positives,
+                COALESCE(rml.missed, 0)::int           AS missed,
+                rml.precision, rml.avg_confidence
+         FROM rule_metrics_live rml
+         WHERE rml.jurisdiction = $1
+         ORDER BY rml.discipline, rml.rule_id`,
+        [jurisdiction],
+      );
+      return res.rows;
+    }
     const res = await pool.query<RuleRow>(`
       SELECT rule_id, discipline,
              COALESCE(total_findings, 0)::int  AS total_findings,
@@ -53,6 +74,20 @@ async function fetchRules(): Promise<RuleRow[]> {
     `);
     return res.rows;
   } catch {
+    if (jurisdiction) {
+      const res = await pool.query<RuleRow>(
+        `SELECT f.rule_id, f.discipline, COUNT(*)::int AS total_findings,
+                0 AS matched, 0 AS false_positives, 0 AS missed,
+                NULL::numeric AS precision, AVG(f.confidence) AS avg_confidence
+         FROM findings f
+         JOIN projects p ON p.project_id = f.project_id
+         WHERE f.rule_id IS NOT NULL AND p.jurisdiction = $1
+         GROUP BY f.rule_id, f.discipline
+         ORDER BY f.discipline, f.rule_id`,
+        [jurisdiction],
+      );
+      return res.rows;
+    }
     const res = await pool.query<RuleRow>(`
       SELECT rule_id, discipline, COUNT(*)::int AS total_findings,
              0 AS matched, 0 AS false_positives, 0 AS missed,
@@ -66,7 +101,22 @@ async function fetchRules(): Promise<RuleRow[]> {
   }
 }
 
-async function fetchDisciplines(): Promise<DisciplineRow[]> {
+async function fetchDisciplines(jurisdiction: string): Promise<DisciplineRow[]> {
+  if (jurisdiction) {
+    const res = await pool.query<DisciplineRow>(
+      `SELECT f.discipline,
+              COUNT(DISTINCT f.rule_id)::int     AS rule_count,
+              COUNT(DISTINCT f.finding_id)::int  AS finding_count,
+              ROUND(AVG(f.confidence)::numeric, 3) AS avg_confidence
+       FROM findings f
+       JOIN projects p ON p.project_id = f.project_id
+       WHERE f.discipline IS NOT NULL AND p.jurisdiction = $1
+       GROUP BY f.discipline
+       ORDER BY f.discipline`,
+      [jurisdiction],
+    );
+    return res.rows;
+  }
   const res = await pool.query<DisciplineRow>(`
     SELECT discipline,
            COUNT(DISTINCT rule_id)::int     AS rule_count,
@@ -104,10 +154,20 @@ const TRIAGE_QUEUES = [
   "overrides",
 ] as const;
 
-export default async function MetricsPage() {
+export default async function MetricsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ jurisdiction?: string }>;
+}) {
+  const { jurisdiction: rawJurisdiction } = await searchParams;
+  const jurisdiction =
+    rawJurisdiction === "santa_rosa" || rawJurisdiction === "oakland"
+      ? rawJurisdiction
+      : "";
+
   const [rules, disciplines, shadowRuns] = await Promise.all([
-    fetchRules(),
-    fetchDisciplines(),
+    fetchRules(jurisdiction),
+    fetchDisciplines(jurisdiction),
     fetchShadow(),
   ]);
 
@@ -121,7 +181,7 @@ export default async function MetricsPage() {
   return (
     <main className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-2">Rule Metrics Dashboard</h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-gray-500 mb-4">
         Precision/recall per rule, computed from AI findings vs authority
         comments. Run{" "}
         <code className="bg-gray-100 px-1 rounded text-xs">
@@ -129,6 +189,35 @@ export default async function MetricsPage() {
         </code>{" "}
         to refresh.
       </p>
+
+      {/* Jurisdiction filter pills */}
+      <div className="flex items-center gap-2 mb-6">
+        <span className="text-xs text-gray-500 font-medium uppercase tracking-wide mr-1">
+          Jurisdiction:
+        </span>
+        {JURISDICTIONS.map((j) => {
+          const isActive = jurisdiction === j.value;
+          const href = j.value ? `/metrics?jurisdiction=${j.value}` : "/metrics";
+          return (
+            <a
+              key={j.value || "all"}
+              href={href}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                isActive
+                  ? "bg-indigo-600 text-white border-indigo-600"
+                  : "bg-white text-gray-600 border-gray-300 hover:border-indigo-400 hover:text-indigo-600"
+              }`}
+            >
+              {j.label}
+            </a>
+          );
+        })}
+        {jurisdiction && (
+          <span className="ml-2 text-xs text-gray-400">
+            Filtering by: <strong>{jurisdiction.replace("_", " ")}</strong>
+          </span>
+        )}
+      </div>
 
       {/* Triage links */}
       <div className="flex gap-3 mb-8">
