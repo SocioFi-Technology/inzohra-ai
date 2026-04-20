@@ -963,6 +963,145 @@ async function runPhase08(): Promise<boolean> {
   return passed;
 }
 
+/**
+ * Phase 09 acceptance criteria (designer checklist / QCA):
+ *   [a] `checklist_queries` table exists (hard fail).
+ *   [b] `checklist_answers` table exists (hard fail).
+ *   [c] `designer_reports` table exists (hard fail).
+ *   [d] `services/ingestion/app/extractors/question_checklist.py` exists (hard fail).
+ *   [e] `services/review/app/qca/answer_pipeline.py` exists (hard fail).
+ *   [f] `services/rendering/src/designer-report.ts` exists (hard fail).
+ *   [g] `apps/web/src/app/designer/page.tsx` exists (hard fail).
+ *   [h] `apps/web/src/app/designer/upload/page.tsx` exists (hard fail).
+ *   [i] `apps/web/src/app/designer/[reportId]/page.tsx` exists (hard fail).
+ *   [j] `skills/jurisdiction-santa-rosa/checklists/sfr-checklist.md` exists (hard fail).
+ *   [k] `fixtures/phase-09/fixture-library-manifest.json` exists (hard fail).
+ *   [l] `services/measurement/app/egress_router.py` exists (hard fail).
+ *   [m] checklist_queries row count (soft warn only — data requires running QCA).
+ */
+async function runPhase09(): Promise<boolean> {
+  let passed = true;
+
+  // Resolve repo root (three levels up from apps/web/scripts/ → apps/web → apps → repo root)
+  const repoRoot = path.resolve(__dirname, "..", "..", "..");
+
+  // [a] checklist_queries table exists
+  const cqRes = await db.query(
+    `SELECT to_regclass('public.checklist_queries') AS tbl`
+  );
+  const aPass = cqRes.rows[0].tbl !== null;
+  console.log(`  [${aPass ? "PASS" : "FAIL"}] [a] checklist_queries table exists`);
+  if (!aPass) passed = false;
+
+  // [b] checklist_answers table exists
+  const caRes = await db.query(
+    `SELECT to_regclass('public.checklist_answers') AS tbl`
+  );
+  const bPass = caRes.rows[0].tbl !== null;
+  console.log(`  [${bPass ? "PASS" : "FAIL"}] [b] checklist_answers table exists`);
+  if (!bPass) passed = false;
+
+  // [c] designer_reports table exists
+  const drRes = await db.query(
+    `SELECT to_regclass('public.designer_reports') AS tbl`
+  );
+  const cPass = drRes.rows[0].tbl !== null;
+  console.log(`  [${cPass ? "PASS" : "FAIL"}] [c] designer_reports table exists`);
+  if (!cPass) passed = false;
+
+  // [d] services/ingestion/app/extractors/question_checklist.py exists
+  const questionChecklistPy = path.join(
+    repoRoot, "services", "ingestion", "app", "extractors", "question_checklist.py"
+  );
+  const dPass = fs.existsSync(questionChecklistPy);
+  console.log(`  [${dPass ? "PASS" : "FAIL"}] [d] services/ingestion/app/extractors/question_checklist.py exists`);
+  if (!dPass) passed = false;
+
+  // [e] services/review/app/qca/answer_pipeline.py exists
+  const answerPipelinePy = path.join(
+    repoRoot, "services", "review", "app", "qca", "answer_pipeline.py"
+  );
+  const ePass = fs.existsSync(answerPipelinePy);
+  console.log(`  [${ePass ? "PASS" : "FAIL"}] [e] services/review/app/qca/answer_pipeline.py exists`);
+  if (!ePass) passed = false;
+
+  // [f] services/rendering/src/designer-report.ts exists
+  const designerReportTs = path.join(
+    repoRoot, "services", "rendering", "src", "designer-report.ts"
+  );
+  const fPass = fs.existsSync(designerReportTs);
+  console.log(`  [${fPass ? "PASS" : "FAIL"}] [f] services/rendering/src/designer-report.ts exists`);
+  if (!fPass) passed = false;
+
+  // [g] apps/web/src/app/designer/page.tsx exists
+  const designerPage = path.join(
+    repoRoot, "apps", "web", "src", "app", "designer", "page.tsx"
+  );
+  const gPass = fs.existsSync(designerPage);
+  console.log(`  [${gPass ? "PASS" : "FAIL"}] [g] apps/web/src/app/designer/page.tsx exists`);
+  if (!gPass) passed = false;
+
+  // [h] apps/web/src/app/designer/upload/page.tsx exists
+  const designerUploadPage = path.join(
+    repoRoot, "apps", "web", "src", "app", "designer", "upload", "page.tsx"
+  );
+  const hPass = fs.existsSync(designerUploadPage);
+  console.log(`  [${hPass ? "PASS" : "FAIL"}] [h] apps/web/src/app/designer/upload/page.tsx exists`);
+  if (!hPass) passed = false;
+
+  // [i] apps/web/src/app/designer/[reportId]/page.tsx exists
+  const designerReportPage = path.join(
+    repoRoot, "apps", "web", "src", "app", "designer", "[reportId]", "page.tsx"
+  );
+  const iPass = fs.existsSync(designerReportPage);
+  console.log(`  [${iPass ? "PASS" : "FAIL"}] [i] apps/web/src/app/designer/[reportId]/page.tsx exists`);
+  if (!iPass) passed = false;
+
+  // [j] skills/jurisdiction-santa-rosa/checklists/sfr-checklist.md exists
+  const srChecklist = path.join(
+    repoRoot, "skills", "jurisdiction-santa-rosa", "checklists", "sfr-checklist.md"
+  );
+  const jPass = fs.existsSync(srChecklist);
+  console.log(`  [${jPass ? "PASS" : "FAIL"}] [j] skills/jurisdiction-santa-rosa/checklists/sfr-checklist.md exists`);
+  if (!jPass) passed = false;
+
+  // [k] fixtures/phase-09/fixture-library-manifest.json exists
+  const fixtureManifest = path.join(
+    repoRoot, "fixtures", "phase-09", "fixture-library-manifest.json"
+  );
+  const kPass = fs.existsSync(fixtureManifest);
+  console.log(`  [${kPass ? "PASS" : "FAIL"}] [k] fixtures/phase-09/fixture-library-manifest.json exists`);
+  if (!kPass) passed = false;
+
+  // [l] services/measurement/app/egress_router.py exists
+  const egressRouterPy = path.join(
+    repoRoot, "services", "measurement", "app", "egress_router.py"
+  );
+  const lPass = fs.existsSync(egressRouterPy);
+  console.log(`  [${lPass ? "PASS" : "FAIL"}] [l] services/measurement/app/egress_router.py exists`);
+  if (!lPass) passed = false;
+
+  // [m] checklist_queries row count (SOFT — warns but does not fail; requires running QCA)
+  if (aPass) {
+    try {
+      const cqCountRes = await db.query(`SELECT COUNT(*) AS cnt FROM checklist_queries`);
+      const cqCount = parseInt(cqCountRes.rows[0].cnt, 10);
+      const mPass = cqCount >= 1;
+      console.log(
+        `  [${mPass ? "PASS" : "UNCHECKED"}] [m] checklist_queries row count: ${cqCount} ` +
+        `(need ≥1; run QCA pipeline if zero)`
+      );
+      // Soft check: do not propagate to overall `passed`
+    } catch {
+      console.log(`  [UNCHECKED] [m] Could not query checklist_queries — run QCA pipeline first`);
+    }
+  } else {
+    console.log(`  [UNCHECKED] [m] checklist_queries table missing — skipping row count check`);
+  }
+
+  return passed;
+}
+
 (async () => {
   try {
     let ok = true;
@@ -1001,11 +1140,15 @@ async function runPhase08(): Promise<boolean> {
       console.log("\n[fixture] phase=08");
       ok = (await runPhase08()) && ok;
     }
+    if (phase === "09" || phase === "all") {
+      console.log("\n[fixture] phase=09");
+      ok = (await runPhase09()) && ok;
+    }
     if (
       phase !== "00" && phase !== "01" && phase !== "02" &&
       phase !== "03" && phase !== "04" && phase !== "05" &&
       phase !== "06" && phase !== "07" && phase !== "08" &&
-      phase !== "all"
+      phase !== "09" && phase !== "all"
     ) {
       console.log(`  [UNCHECKED] Phase ${phase} checks not yet implemented.`);
     }
