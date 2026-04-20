@@ -61,14 +61,15 @@ interface ProjectRow {
   project_id: string;
   permit_number: string;
   jurisdiction: string;
-  project_address: string;
-  applicant_name: string;
-  project_description: string;
+  address: string;           // actual column name in DB
+  occupancy_class: string | null;
+  construction_type: string | null;
 }
 
 interface SubmittalRow {
   submittal_id: string;
-  submittal_date: string; // DATE → JS string from pg
+  round_number: number;      // actual column name in DB
+  received_at: string | null;
 }
 
 interface FindingRow {
@@ -140,7 +141,7 @@ export interface LetterBundle {
 async function fetchProject(client: Client, projectId: string): Promise<ProjectRow> {
   const res = await client.query<ProjectRow>(
     `SELECT project_id, permit_number, jurisdiction,
-            project_address, applicant_name, project_description
+            address, occupancy_class, construction_type
      FROM projects WHERE project_id = $1`,
     [projectId],
   );
@@ -153,9 +154,9 @@ async function fetchProject(client: Client, projectId: string): Promise<ProjectR
 async function fetchSubmittal(client: Client, projectId: string): Promise<SubmittalRow> {
   // Take the most recent submittal for this project.
   const res = await client.query<SubmittalRow>(
-    `SELECT submittal_id, submittal_date
+    `SELECT submittal_id, round_number, received_at
      FROM submittals WHERE project_id = $1
-     ORDER BY submittal_date DESC LIMIT 1`,
+     ORDER BY round_number DESC LIMIT 1`,
     [projectId],
   );
   if (res.rows.length === 0) {
@@ -278,9 +279,9 @@ export function buildJsonBundle(
     },
     project_block: {
       permit_number: project.permit_number,
-      address: project.project_address,
-      applicant: project.applicant_name,
-      description: project.project_description,
+      address: project.address,
+      applicant: project.occupancy_class ?? "—",
+      description: project.construction_type ?? "—",
     },
     general_instructions: tmpl.generalInstructions,
     signature_block: {
@@ -378,12 +379,11 @@ async function writePdf(bundle: LetterBundle, outPath: string): Promise<void> {
 
     const pb = bundle.project_block;
     const projLines = [
-      `Permit Number:   ${pb.permit_number}`,
-      `Address:         ${pb.address}`,
-      `Applicant:       ${pb.applicant}`,
-      `Description:     ${pb.description}`,
-      `Submittal Date:  ${bundle.generated_at.slice(0, 10)}`,
-      `Review Round:    ${bundle.review_round}`,
+      `Permit Number:  ${pb.permit_number}`,
+      `Address:        ${pb.address}`,
+      `Jurisdiction:   ${bundle.jurisdiction}`,
+      `Review Round:   ${bundle.review_round}`,
+      `Generated:      ${bundle.generated_at.slice(0, 10)}`,
     ];
     for (const line of projLines) {
       doc.text(line, { lineGap: tmpl.lineGap });
@@ -547,10 +547,9 @@ async function writeDocx(bundle: LetterBundle, outPath: string): Promise<void> {
   const projectLines = [
     `Permit Number: ${pb.permit_number}`,
     `Address: ${pb.address}`,
-    `Applicant: ${pb.applicant}`,
-    `Description: ${pb.description}`,
-    `Submittal Date: ${bundle.generated_at.slice(0, 10)}`,
+    `Jurisdiction: ${bundle.jurisdiction}`,
     `Review Round: ${bundle.review_round}`,
+    `Generated: ${bundle.generated_at.slice(0, 10)}`,
   ];
   allParagraphs.push(
     labelParagraph("Project Information"),
