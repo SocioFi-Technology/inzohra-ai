@@ -37,6 +37,21 @@ Two required exits measure 12 ft apart; overall diagonal 60 ft; required separat
 **Rule:** `ARCH-EGRESS-020`.
 > *The two required exits on the upper floor (Sheet A-1.2) are approximately 12 ft apart. CBC §1007.1.1 requires exit separation of at least half the overall diagonal (30 ft for this floor). Revise the exit layout to comply.*
 
+### Example 3 — AR-EGRESS-WIN-001: bedroom egress window NCO too small (BV comment #2)
+Bedroom window tag W-3 has measured NCO 4.8 sqft; sill height 46 in.
+**Rule:** `AR-EGRESS-WIN-001`.
+> *The egress window at Bedroom 3 (tag W-3, Sheet A2.1) has a net clear opening of 4.8 sq ft and a sill height of 46 inches above finish floor. CRC §R310.2.1 requires a minimum net clear opening of 5.7 sq ft; CRC §R310.2.4 limits the sill height to 44 inches. Revise the window schedule and rough opening to comply with both requirements.*
+
+### Example 4 — AR-TRAVEL-001: exit access travel distance (BV comment #15)
+Measured egress path from room at rear of floor to exit door: 268 ft.
+**Rule:** `AR-TRAVEL-001`.
+> *The exit access travel distance from the rear bedroom on the second floor (Sheet A2.2) to the exit door measures approximately 268 feet. CBC §1017.2.2 limits exit access travel distance in Group R-3 occupancies to 250 feet. Revise the floor plan layout or provide an additional exit to comply.*
+
+### Example 5 — AR-EXIT-SEP-001: exit separation (BV comment #14)
+Two exits on second floor are 18 ft apart; building diagonal 72 ft; required minimum 36 ft.
+**Rule:** `AR-EXIT-SEP-001`.
+> *The two required exits on the upper floor (Sheet A2.2) are approximately 18 feet apart (edge to edge). CBC §1014.3 requires exits to be separated by at least one-half the maximum overall diagonal of the floor (36 feet for this floor). Revise the exit locations to achieve the required separation.*
+
 ## Decision tree
 - Rule-emittable checks (clear-width, NCO, travel distance, exit separation) → deterministic rule with measurement backing → `revise`.
 - Narrative-consistency checks → LLM tail → `clarify`.

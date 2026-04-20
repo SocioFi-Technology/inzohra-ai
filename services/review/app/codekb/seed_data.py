@@ -569,7 +569,230 @@ CPC_CH4_SECTIONS: list[SeedSection] = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# CRC R310 + CBC Ch10 egress / CBC Ch11B access — Phase 04 additions
+# ---------------------------------------------------------------------------
+
+CBC_ARCH_ACCESS_SECTIONS: list[SeedSection] = [
+    SeedSection(
+        canonical_id="CRC-R310.1",
+        code="CRC",
+        section_number="R310.1",
+        title="Emergency escape and rescue openings — general",
+        body_text=(
+            "Every sleeping room shall have not less than one operable emergency escape "
+            "and rescue opening. Where basements contain one or more sleeping rooms, "
+            "emergency egress and rescue openings shall be required in each sleeping "
+            "room. Emergency escape and rescue openings shall comply with Sections "
+            "R310.1.1 through R310.1.4."
+        ),
+        cross_references=["CRC-R310.2.1", "CRC-R310.2.2", "CRC-R310.2.3", "CRC-R310.2.4"],
+    ),
+    SeedSection(
+        canonical_id="CRC-R310.2.1",
+        code="CRC",
+        section_number="R310.2.1",
+        title="Minimum opening area",
+        body_text=(
+            "Emergency escape and rescue openings shall have a minimum net clear opening "
+            "of 5.7 square feet. Exception: Grade floor or below grade floor openings "
+            "shall have a minimum net clear opening of 5 square feet."
+        ),
+        cross_references=["CRC-R310.1"],
+    ),
+    SeedSection(
+        canonical_id="CRC-R310.2.2",
+        code="CRC",
+        section_number="R310.2.2",
+        title="Minimum opening height",
+        body_text=(
+            "The minimum net clear opening height shall be 24 inches."
+        ),
+        cross_references=["CRC-R310.1"],
+    ),
+    SeedSection(
+        canonical_id="CRC-R310.2.3",
+        code="CRC",
+        section_number="R310.2.3",
+        title="Minimum opening width",
+        body_text=(
+            "The minimum net clear opening width shall be 20 inches."
+        ),
+        cross_references=["CRC-R310.1"],
+    ),
+    SeedSection(
+        canonical_id="CRC-R310.2.4",
+        code="CRC",
+        section_number="R310.2.4",
+        title="Maximum sill height",
+        body_text=(
+            "The maximum sill height shall be 44 inches measured from the floor."
+        ),
+        cross_references=["CRC-R310.1"],
+    ),
+    SeedSection(
+        canonical_id="CBC-1004.5",
+        code="CBC",
+        section_number="1004.5",
+        title="Function of occupied spaces",
+        body_text=(
+            "The minimum number of occupants for which the means of egress of a building "
+            "or portion thereof is designed shall be determined in accordance with Table "
+            "1004.5, based on the function of the space, or the actual number of "
+            "occupants, whichever is greater. \u2026"
+        ),
+        cross_references=["CBC-TBL-1004.5", "CBC-1004.1"],
+    ),
+    SeedSection(
+        canonical_id="CBC-1017.2.2",
+        code="CBC",
+        section_number="1017.2.2",
+        title="Exit access travel distance — Group R-3",
+        body_text=(
+            "The exit access travel distance in Group R-3 occupancies shall not exceed "
+            "250 feet (76 200 mm) from any point in the tenant space to the entrance to "
+            "the exit. \u2026"
+        ),
+        cross_references=["CBC-1017.1"],
+    ),
+    SeedSection(
+        canonical_id="CBC-1014.3",
+        code="CBC",
+        section_number="1014.3",
+        title="Exit separation",
+        body_text=(
+            "Where two or more exits or exit access doorways are required, the exits or "
+            "exit access doorways shall be placed a distance apart equal to not less than "
+            "one-half of the length of the maximum overall diagonal dimension of the "
+            "building or area to be served measured in a straight line between the nearest "
+            "edges of the exits or exit access doorways."
+        ),
+        cross_references=["CBC-1006.3.3"],
+    ),
+    SeedSection(
+        canonical_id="CBC-1019.2",
+        code="CBC",
+        section_number="1019.2",
+        title="Exit discharge",
+        body_text=(
+            "Exits shall discharge directly to the exterior of the building. The "
+            "out-swing of a gate or door at the exit discharge shall not reduce the "
+            "required width of the exit discharge."
+        ),
+        cross_references=["CBC-1019.1"],
+    ),
+    SeedSection(
+        canonical_id="CRC-R314.3",
+        code="CRC",
+        section_number="R314.3",
+        title="Smoke alarm locations",
+        body_text=(
+            "Smoke alarms shall be installed in the following locations: 1. In each "
+            "sleeping room. 2. Outside each separate sleeping area in the immediate "
+            "vicinity of the bedrooms. 3. On each additional story of the dwelling, "
+            "including basements and habitable attics but not crawl spaces and "
+            "uninhabitable attics. \u2026"
+        ),
+        cross_references=["CRC-R314.1"],
+    ),
+    SeedSection(
+        canonical_id="CBC-11B-304.3.1",
+        code="CBC",
+        section_number="11B-304.3.1",
+        title="Circular turning space",
+        body_text=(
+            "The turning space shall comply with Section 11B-304.3.1 or 11B-304.3.2. "
+            "A circular turning space of 60 inches (1525 mm) minimum diameter shall "
+            "be provided."
+        ),
+        cross_references=["CBC-11B-304.3"],
+    ),
+    SeedSection(
+        canonical_id="CBC-11B-308.2.1",
+        code="CBC",
+        section_number="11B-308.2.1",
+        title="Forward reach",
+        body_text=(
+            "Where a clear floor or ground space allows only forward approach to an "
+            "element, the element shall be within one or more of the reach ranges "
+            "specified in Sections 11B-308.2 and 11B-308.3. Obstructed high forward "
+            "reach: where the clear floor or ground space is obstructed, the high "
+            "forward reach shall be 48 inches (1220 mm) maximum."
+        ),
+        cross_references=["CBC-11B-308.2", "CBC-11B-308.3"],
+    ),
+    SeedSection(
+        canonical_id="CBC-11B-404.2.3.1",
+        code="CBC",
+        section_number="11B-404.2.3.1",
+        title="Minimum clear width at doorways",
+        body_text=(
+            "Doorways shall have a minimum clear opening width of 32 inches (815 mm). "
+            "Clear opening width of swinging doors shall be measured between the face "
+            "of the door and stop, with the door open 90 degrees."
+        ),
+        cross_references=["CBC-11B-404.2.3"],
+    ),
+    SeedSection(
+        canonical_id="CBC-11B-604.7",
+        code="CBC",
+        section_number="11B-604.7",
+        title="Toilet paper dispensers",
+        body_text=(
+            "Toilet paper dispensers shall comply with Sections 11B-308 and 11B-309. "
+            "Toilet paper dispensers shall be located on the side wall, 7 inches "
+            "(178 mm) minimum and 9 inches (229 mm) maximum in front of the water "
+            "closet measured to the centerline of the dispenser. The outlet of the "
+            "dispenser shall be 15 inches (381 mm) minimum and 48 inches (1220 mm) "
+            "maximum above the finish floor."
+        ),
+        cross_references=["CBC-11B-604", "CBC-11B-308", "CBC-11B-309"],
+    ),
+    SeedSection(
+        canonical_id="CBC-11B-703.4.1",
+        code="CBC",
+        section_number="11B-703.4.1",
+        title="Mounting location of tactile signs",
+        body_text=(
+            "Where signs with raised characters or Braille are provided on doors, "
+            "the signs shall be located on the latch side of the door. The centerline "
+            "of the signs shall be 60 inches (1525 mm) above the finish floor. \u2026 "
+            "Where there is no wall space to the latch side of the door, including at "
+            "double-leaf doors, signs shall be placed on the nearest adjacent wall."
+        ),
+        cross_references=["CBC-11B-703.4"],
+    ),
+    SeedSection(
+        canonical_id="CBC-11B-804.2.1",
+        code="CBC",
+        section_number="11B-804.2.1",
+        title="Kitchen clearance",
+        body_text=(
+            "In kitchens with a U-shaped floor plan and both sides longer than 60 "
+            "inches (1525 mm), the required clear floor space shall be positioned for "
+            "a parallel approach. Where a kitchen does not have a U-shaped floor plan, "
+            "or where a U-shape floor plan has one or both sides 60 inches (1525 mm) "
+            "or less, the clear floor space at a sink, cooking surface or work surface "
+            "shall be positioned for either a forward or parallel approach."
+        ),
+        cross_references=["CBC-11B-804"],
+    ),
+    SeedSection(
+        canonical_id="CBC-11B-902.3",
+        code="CBC",
+        section_number="11B-902.3",
+        title="Height of dining and work surfaces",
+        body_text=(
+            "The tops of dining surfaces and work surfaces shall be 28 inches (711 mm) "
+            "minimum and 34 inches (864 mm) maximum above the finish floor."
+        ),
+        cross_references=["CBC-11B-902"],
+    ),
+]
+
+
 ALL_SEED_SECTIONS: list[SeedSection] = (
     CBC_107_SECTIONS + CBC_11B_SECTIONS + CBC_508_716_SECTIONS
     + CBC_CH5_SECTIONS + CBC_CH10_SECTIONS + CENC_150_SECTIONS + CPC_CH4_SECTIONS
+    + CBC_ARCH_ACCESS_SECTIONS
 )

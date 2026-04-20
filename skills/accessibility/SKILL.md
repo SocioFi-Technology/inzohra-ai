@@ -39,6 +39,21 @@ Bathroom measures 16" from WC centerline to side wall.
 **Rule:** `ACC-TURNING-005`.
 > *The required 60" turning space in the accessible bathroom (Sheet A-1.2) is partially obstructed by the inward-swinging door. CBC §11B-304.3 requires turning space to be clear of door swings. Revise the door swing or the turning space location.*
 
+### Example 3 — AC-PATH-001: path-of-travel trigger for addition/alteration (BV comment #22)
+Kitchen remodel cost $42 k; accessible path to kitchen blocked by 29-inch doorway.
+**Rule:** `AC-PATH-001`.
+> *The kitchen alteration (Sheet A3.1) triggers path-of-travel requirements under CBC §11B-202.4. The doorway on the accessible route to the kitchen provides a 29-inch clear width, which does not meet the 32-inch minimum required by CBC §11B-404.2.3.1. Provide an accessible path of travel to the altered area or document that disproportionate cost applies.*
+
+### Example 4 — AC-TURN-001: turning space (BV comment #34)
+Accessible bathroom turning circle is 57 inches in diameter due to door swing intrusion.
+**Rule:** `AC-TURN-001`.
+> *The accessible bathroom (Sheet A3.2) shows a 57-inch turning diameter. CBC §11B-304.3.1 requires a circular turning space of 60 inches minimum diameter, clear of door swings. Revise the layout — relocate the door swing or enlarge the room — to provide a compliant turning space.*
+
+### Example 5 — AC-TP-DISP-001: toilet paper dispenser (BV comment #40)
+Toilet paper dispenser shown 11 inches in front of WC centerline, outlet at 52 inches AFF.
+**Rule:** `AC-TP-DISP-001`.
+> *The toilet paper dispenser (Sheet A3.3) is located 11 inches in front of the water closet centerline and 52 inches above finish floor. CBC §11B-604.7 requires the dispenser to be 7–9 inches in front of the water closet centerline, with the outlet between 15 and 48 inches above finish floor. Revise the dispenser location to comply.*
+
 ## Decision tree
 - Geometric findings → rule + measurement → `revise`.
 - Signage missing → `provide`; signage incorrect → `revise`.

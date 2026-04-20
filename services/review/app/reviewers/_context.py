@@ -74,6 +74,34 @@ class IndexEntryRow:
     confidence: float
 
 
+@dataclass
+class FloorPlanEntityRow:
+    entity_id: str
+    sheet_id: str
+    page: int
+    entity_type: str          # "door" | "window" | "room" | "stair" | "exit"
+    tag: str | None
+    room_label: str | None
+    room_use: str | None
+    bbox: list[float]
+    confidence: float
+    geometry_notes: str | None
+    schedule_ref: str | None
+
+
+@dataclass
+class MeasurementRow:
+    measurement_id: str
+    sheet_id: str
+    type: str                 # "door_clear_width" | "window_nco" | "room_area" | "egress_distance"
+    value: float
+    unit: str
+    confidence: float
+    tag: str | None
+    entity_id: str | None
+    bbox: list[float] | None
+
+
 # ---------------------------------------------------------------------------
 # FindingPayload — the structured record each rule returns
 # ---------------------------------------------------------------------------
@@ -320,4 +348,206 @@ def emit_findings(
         )
         finding_ids.append(fid)
 
+    return finding_ids
+
+
+# ---------------------------------------------------------------------------
+# Phase-04: ArchAccessRuleContext + loaders + helpers
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class ArchAccessRuleContext:
+    """Superset of RuleContext plus measurement data for Arch + Access reviewers."""
+
+    # core — copy of RuleContext fields
+    project_id: str
+    submittal_id: str
+    review_round: int
+    jurisdiction: str
+    effective_date: str
+    project_address: str
+    database_url: str
+    sheets: list[SheetRow] = field(default_factory=list)
+    title_blocks: list[TitleBlockRow] = field(default_factory=list)
+    index_entries: list[IndexEntryRow] = field(default_factory=list)
+    # phase-04 additions
+    floor_plan_entities: list[FloorPlanEntityRow] = field(default_factory=list)
+    measurements: list[MeasurementRow] = field(default_factory=list)
+
+    @property
+    def rooms(self) -> list[FloorPlanEntityRow]:
+        return [e for e in self.floor_plan_entities if e.entity_type == "room"]
+
+    @property
+    def doors(self) -> list[FloorPlanEntityRow]:
+        return [e for e in self.floor_plan_entities if e.entity_type == "door"]
+
+    @property
+    def windows(self) -> list[FloorPlanEntityRow]:
+        return [e for e in self.floor_plan_entities if e.entity_type == "window"]
+
+    @property
+    def bedroom_rooms(self) -> list[FloorPlanEntityRow]:
+        return [e for e in self.floor_plan_entities if e.room_use == "bedroom"]
+
+
+def load_arch_access_context(
+    conn: psycopg.Connection,  # type: ignore[type-arg]
+    *,
+    project_id: str,
+    submittal_id: str,
+    review_round: int,
+    database_url: str,
+) -> ArchAccessRuleContext:
+    """Load RuleContext + floor plan entities + measurements."""
+    base = load_rule_context(
+        conn,
+        project_id=project_id,
+        submittal_id=submittal_id,
+        review_round=review_round,
+        database_url=database_url,
+    )
+    ctx = ArchAccessRuleContext(
+        project_id=base.project_id,
+        submittal_id=base.submittal_id,
+        review_round=base.review_round,
+        jurisdiction=base.jurisdiction,
+        effective_date=base.effective_date,
+        project_address=base.project_address,
+        database_url=base.database_url,
+        sheets=base.sheets,
+        title_blocks=base.title_blocks,
+        index_entries=base.index_entries,
+    )
+
+    # floor plan entities
+    fp_rows = conn.execute(
+        """SELECT entity_id, sheet_id, page, payload, confidence
+             FROM entities
+            WHERE project_id = %s AND type = 'floor_plan_entity'
+            ORDER BY page""",
+        (project_id,),
+    ).fetchall()
+    for r in fp_rows:
+        p = r["payload"] or {}
+        ctx.floor_plan_entities.append(
+            FloorPlanEntityRow(
+                entity_id=str(r["entity_id"]),
+                sheet_id=str(r["sheet_id"]),
+                page=int(r["page"]),
+                entity_type=p.get("entity_type", "unknown"),
+                tag=p.get("tag"),
+                room_label=p.get("room_label"),
+                room_use=p.get("room_use"),
+                bbox=list(p.get("bbox") or [0, 0, 0, 0]),
+                confidence=float(r["confidence"]),
+                geometry_notes=p.get("geometry_notes"),
+                schedule_ref=p.get("schedule_ref"),
+            )
+        )
+
+    # measurements
+    m_rows = conn.execute(
+        """SELECT measurement_id, sheet_id, type, value, unit, confidence,
+                  tag, entity_id, bbox
+             FROM measurements
+            WHERE project_id = %s
+            ORDER BY type, tag""",
+        (project_id,),
+    ).fetchall()
+    for r in m_rows:
+        ctx.measurements.append(
+            MeasurementRow(
+                measurement_id=str(r["measurement_id"]),
+                sheet_id=str(r["sheet_id"]),
+                type=str(r["type"]),
+                value=float(r["value"]),
+                unit=str(r["unit"]),
+                confidence=float(r["confidence"]),
+                tag=r.get("tag"),
+                entity_id=str(r["entity_id"]) if r.get("entity_id") else None,
+                bbox=list(r["bbox"]) if r.get("bbox") else None,
+            )
+        )
+
+    return ctx
+
+
+def get_citation_aa(
+    ctx: ArchAccessRuleContext,
+    canonical_id: str,
+) -> dict[str, Any] | None:
+    """Retrieve a code section from the KB for an ArchAccessRuleContext.
+
+    Returns ``None`` if the section is not found.
+    """
+    cit: Citation | None = lookup_canonical(
+        ctx.database_url,
+        canonical_id=canonical_id,
+        jurisdiction=ctx.jurisdiction,
+        effective_date=ctx.effective_date,
+    )
+    if cit is None:
+        return None
+    return cit.to_finding_citation()
+
+
+def emit_findings_aa(
+    conn: psycopg.Connection,  # type: ignore[type-arg]
+    ctx: ArchAccessRuleContext,
+    findings: list[FindingPayload],
+    discipline: str,
+    extractor_versions_used: list[str] | None = None,
+) -> list[str]:
+    """Bulk-insert findings from an ArchAccessRuleContext.
+
+    Same logic as ``emit_findings`` but ``discipline`` is a caller parameter
+    (not hardcoded to ``'plan_integrity'``).
+
+    Returns the list of inserted ``finding_id`` UUIDs.
+    """
+    ext_versions = extractor_versions_used or []
+    finding_ids: list[str] = []
+    for fp in findings:
+        fid = str(uuid.uuid4())
+        conn.execute(
+            """INSERT INTO findings (
+                finding_id, project_id, submittal_id, review_round,
+                discipline, rule_id, rule_version,
+                llm_reasoner_id, prompt_hash,
+                severity, requires_licensed_review,
+                sheet_reference, evidence, citations,
+                draft_comment_text, confidence,
+                extractor_versions_used
+               ) VALUES (
+                %s, %s, %s, %s,
+                %s, %s, %s,
+                %s, %s,
+                %s, %s,
+                %s, %s, %s,
+                %s, %s,
+                %s
+               )""",
+            (
+                fid,
+                ctx.project_id,
+                ctx.submittal_id,
+                ctx.review_round,
+                discipline,
+                fp.rule_id,
+                fp.rule_version,
+                fp.llm_reasoner_id,
+                fp.prompt_hash,
+                fp.severity,
+                fp.requires_licensed_review,
+                Jsonb(fp.sheet_reference),
+                Jsonb(fp.evidence),
+                Jsonb(fp.citations),
+                fp.draft_comment_text,
+                fp.confidence,
+                ext_versions,
+            ),
+        )
+        finding_ids.append(fid)
     return finding_ids
