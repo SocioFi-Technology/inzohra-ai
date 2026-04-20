@@ -53,11 +53,12 @@ CREATE INDEX IF NOT EXISTS idx_drafter_examples_pack_disc_sev
 --    findings → projects gives us jurisdiction without any extra join cost.
 -- ============================================================================
 
+-- NOTE: jurisdiction is appended as the LAST column so CREATE OR REPLACE VIEW
+-- does not need to change the position of any existing column.
 CREATE OR REPLACE VIEW rule_metrics_live AS
 SELECT
     f.rule_id,
     f.discipline,
-    p.jurisdiction,                                                              -- NEW
     COUNT(DISTINCT f.finding_id)                                                 AS total_findings,
     COUNT(DISTINCT ar.finding_id) FILTER (WHERE ar.bucket = 'matched')           AS matched,
     COUNT(DISTINCT ar.finding_id) FILTER (WHERE ar.bucket = 'false_positive')    AS false_positives,
@@ -70,11 +71,12 @@ SELECT
         END, 3
     )                                                                            AS precision,
     AVG(f.confidence)                                                            AS avg_confidence,
-    MAX(f.created_at)                                                            AS last_evaluated_at
+    MAX(f.created_at)                                                            AS last_evaluated_at,
+    p.jurisdiction                                                               -- appended last (Phase 08)
 FROM findings f
-JOIN projects p ON p.project_id = f.project_id                                  -- NEW
+JOIN projects p ON p.project_id = f.project_id
 LEFT JOIN alignment_records ar ON ar.finding_id = f.finding_id
-GROUP BY f.rule_id, f.discipline, p.jurisdiction;                               -- NEW
+GROUP BY f.rule_id, f.discipline, p.jurisdiction;
 
 -- ============================================================================
 -- 4. rule_metrics MATERIALIZED VIEW — add jurisdiction column.
@@ -87,6 +89,9 @@ GROUP BY f.rule_id, f.discipline, p.jurisdiction;                               
 -- Drop the old index first (depends on the view)
 DROP INDEX IF EXISTS rule_metrics_rule_id_idx;
 
+-- Safety: drop as plain TABLE in case migration 0012 did not run yet
+DROP TABLE IF EXISTS rule_metrics;
+
 -- Drop and recreate the materialized view with jurisdiction
 DROP MATERIALIZED VIEW IF EXISTS rule_metrics;
 
@@ -98,7 +103,7 @@ SELECT
     COUNT(DISTINCT f.finding_id)                                                 AS total_findings,
     COUNT(DISTINCT ar.finding_id) FILTER (WHERE ar.bucket = 'matched')           AS matched,
     COUNT(DISTINCT ar.finding_id) FILTER (WHERE ar.bucket = 'false_positive')    AS false_positives,
-    COUNT(DISTINCT erc.comment_id) FILTER (WHERE ar.bucket = 'missed')           AS missed,
+    COUNT(DISTINCT erc.external_comment_id) FILTER (WHERE ar.bucket = 'missed')  AS missed,
     CASE WHEN COUNT(DISTINCT f.finding_id) > 0
          THEN COUNT(DISTINCT ar.finding_id) FILTER (WHERE ar.bucket = 'matched')::float
               / COUNT(DISTINCT f.finding_id)
@@ -120,7 +125,7 @@ SELECT
 FROM findings f
 JOIN projects p ON p.project_id = f.project_id                                  -- NEW
 LEFT JOIN alignment_records ar ON ar.finding_id = f.finding_id
-LEFT JOIN external_review_comments erc ON erc.comment_id = ar.comment_id
+LEFT JOIN external_review_comments erc ON erc.external_comment_id = ar.comment_id
 GROUP BY f.rule_id, f.discipline, p.jurisdiction, f.project_id                  -- NEW
 WITH NO DATA;
 

@@ -27,6 +27,10 @@ CREATE TABLE IF NOT EXISTS shadow_runs (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- rule_metrics existed as a plain TABLE in earlier schema versions; drop it so
+-- we can replace it with a materialized view.
+DROP TABLE IF EXISTS rule_metrics;
+
 -- Per-rule precision/recall metrics (refreshed nightly via REFRESH MATERIALIZED VIEW)
 CREATE MATERIALIZED VIEW IF NOT EXISTS rule_metrics AS
 SELECT
@@ -35,7 +39,7 @@ SELECT
     COUNT(DISTINCT f.finding_id)                                   AS total_findings,
     COUNT(DISTINCT ar.finding_id) FILTER (WHERE ar.bucket = 'matched')    AS matched,
     COUNT(DISTINCT ar.finding_id) FILTER (WHERE ar.bucket = 'false_positive') AS false_positives,
-    COUNT(DISTINCT erc.comment_id) FILTER (WHERE ar.bucket = 'missed')     AS missed,
+    COUNT(DISTINCT erc.external_comment_id) FILTER (WHERE ar.bucket = 'missed') AS missed,
     CASE WHEN COUNT(DISTINCT f.finding_id) > 0
          THEN COUNT(DISTINCT ar.finding_id) FILTER (WHERE ar.bucket = 'matched')::float
               / COUNT(DISTINCT f.finding_id)
@@ -49,7 +53,7 @@ SELECT
     MAX(f.created_at)                                              AS last_evaluated_at
 FROM findings f
 LEFT JOIN alignment_records ar ON ar.finding_id = f.finding_id
-LEFT JOIN external_review_comments erc ON erc.comment_id = ar.comment_id
+LEFT JOIN external_review_comments erc ON erc.external_comment_id = ar.comment_id
 GROUP BY f.rule_id, f.discipline, f.project_id
 WITH NO DATA;
 

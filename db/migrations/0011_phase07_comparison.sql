@@ -2,25 +2,20 @@
 -- Creates external_review_comments, alignment_records, and reviewer_edits.
 -- All statements are idempotent (CREATE TABLE IF NOT EXISTS).
 
--- Stores authority (BV) comment-letter comments parsed from the external review
-CREATE TABLE IF NOT EXISTS external_review_comments (
-    comment_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    project_id      UUID NOT NULL,
-    review_round    INT  NOT NULL DEFAULT 1,
-    comment_number  INT  NOT NULL,
-    sheet_ref       TEXT,
-    comment_text    TEXT NOT NULL,
-    discipline      TEXT,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+-- external_review_comments was created in the baseline schema with external_comment_id as PK.
+-- This migration does not recreate it; instead it adds any Phase-07 columns that may be missing.
+ALTER TABLE external_review_comments ADD COLUMN IF NOT EXISTS comment_number INT;
+ALTER TABLE external_review_comments ADD COLUMN IF NOT EXISTS sheet_ref TEXT;
+ALTER TABLE external_review_comments ADD COLUMN IF NOT EXISTS discipline TEXT;
 
--- One row per AI-finding <-> authority-comment alignment attempt
+-- One row per AI-finding <-> authority-comment alignment attempt.
+-- comment_id references external_review_comments(external_comment_id) — the actual PK column name.
 CREATE TABLE IF NOT EXISTS alignment_records (
     alignment_id    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id      UUID NOT NULL,
     review_round    INT  NOT NULL DEFAULT 1,
     finding_id      UUID REFERENCES findings(finding_id),
-    comment_id      UUID REFERENCES external_review_comments(comment_id),
+    comment_id      UUID REFERENCES external_review_comments(external_comment_id),
     bucket          TEXT NOT NULL CHECK (bucket IN ('matched','missed','false_positive','partial')),
     similarity_score FLOAT,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now()

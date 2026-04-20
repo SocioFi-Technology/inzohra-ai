@@ -701,8 +701,8 @@ async function runPhase06(): Promise<boolean> {
 async function runPhase07(): Promise<boolean> {
   let passed = true;
 
-  // Resolve repo root (two levels up from apps/web/scripts/)
-  const repoRoot = path.resolve(__dirname, "..", "..", "..", "..");
+  // Resolve repo root (three levels up from apps/web/scripts/ → apps/web → apps → repo root)
+  const repoRoot = path.resolve(__dirname, "..", "..", "..");
 
   // [a] external_review_comments table exists
   const ercRes = await db.query(
@@ -835,8 +835,8 @@ async function runPhase07(): Promise<boolean> {
 async function runPhase08(): Promise<boolean> {
   let passed = true;
 
-  // Resolve repo root (two levels up from apps/web/scripts/)
-  const repoRoot = path.resolve(__dirname, "..", "..", "..", "..");
+  // Resolve repo root (three levels up from apps/web/scripts/ → apps/web → apps → repo root)
+  const repoRoot = path.resolve(__dirname, "..", "..", "..");
 
   // [a] submittal_checklists table exists
   const scRes = await db.query(
