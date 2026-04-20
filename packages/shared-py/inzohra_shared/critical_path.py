@@ -23,6 +23,18 @@ CRITICAL_PATH_RULES: frozenset[str] = frozenset(
         "ELEC-SERVICE-SIZE-ADEQUACY",
         # Mechanical
         "MECH-LOAD-CALC-ADEQUACY",
+        # Fire / Life Safety — Phase 05
+        "FIRE-NFPA13R-REQUIRED",
+        "FIRE-ALARM-REQUIRED",
+        "FIRE-HSC13131-TYPE-V",
+        "FIRE-SEP-RATING-508",
+        # Structural — Phase 05
+        "STR-HEADER-SIZING",
+        "STR-PLUMB-WALL-STUDS",
+        # Mechanical — Phase 05
+        "MECH-HVAC-DEDICATED",
+        # Energy — Phase 05
+        "EN-HERS-SIGNED-DECL",
     }
 )
 

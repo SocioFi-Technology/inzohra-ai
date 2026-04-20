@@ -791,8 +791,366 @@ CBC_ARCH_ACCESS_SECTIONS: list[SeedSection] = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# Phase 05 — MEP / Structural / Fire / Energy / CalGreen expansions
+# ---------------------------------------------------------------------------
+
+CBC_MEP_STRUCT_FIRE_SECTIONS: list[SeedSection] = [
+    SeedSection(
+        canonical_id="CMC-504.1",
+        code="CMC",
+        section_number="504.1",
+        title="Bath exhaust ventilation",
+        body_text=(
+            "Every bathroom and toilet room in which a bathtub, shower, spa, or similar "
+            "fixture is installed shall be provided with a mechanical exhaust ventilation "
+            "system that will draw out the odors and moisture from the space. \u2026"
+            "The exhaust system shall be designed and sized based on a minimum flow rate "
+            "of 50 cfm intermittent or 20 cfm continuous in bathrooms and shall be vented "
+            "to the outside of the building."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CMC-403.1"],
+    ),
+    SeedSection(
+        canonical_id="CMC-505.1",
+        code="CMC",
+        section_number="505.1",
+        title="Domestic range hoods",
+        body_text=(
+            "Domestic range hoods shall discharge to the outdoors through a duct. The duct "
+            "serving the hood shall have a smooth interior surface, shall be airtight, shall "
+            "be equipped with a backdraft damper, and shall not terminate in an attic or "
+            "crawl space or areas inside the building. Domestic hoods shall be provided when "
+            "a cooking appliance is installed."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CMC-505.2"],
+    ),
+    SeedSection(
+        canonical_id="CMC-505.2",
+        code="CMC",
+        section_number="505.2",
+        title="Makeup air for range hoods over 400 cfm",
+        body_text=(
+            "When the domestic range hood or similar device is rated over 400 cfm, makeup "
+            "air at a rate approximately equal to the exhaust air rate shall be provided. "
+            "The makeup air intakes shall be located so as to avoid recirculation of "
+            "contaminated air within the building."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CMC-505.1"],
+    ),
+    SeedSection(
+        canonical_id="CMC-403.1",
+        code="CMC",
+        section_number="403.1",
+        title="Outside air requirements",
+        body_text=(
+            "Outside air shall be supplied to every air-conditioning system that serves "
+            "human occupancy during periods of occupancy. The quantity of outside air "
+            "supplied shall not be less than the requirements of this chapter."
+        ),
+        effective_date="2023-01-01",
+    ),
+    SeedSection(
+        canonical_id="CEnC-150.0-m1",
+        code="CEnC",
+        section_number="150.0(m)1",
+        title="Duct insulation (R-6 minimum)",
+        body_text=(
+            "All ducts, plenums, and fans that are part of a forced-air system shall be "
+            "insulated to meet the requirements of the applicable minimum insulation levels. "
+            "In Climate Zone 16, all ducts shall be insulated to a minimum of R-8. In other "
+            "climate zones, ducts located in conditioned space may be exempt. Ducts located "
+            "outside conditioned space shall be insulated to a minimum of R-6."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CEnC-150.1"],
+    ),
+    SeedSection(
+        canonical_id="CBC-1202.2",
+        code="CBC",
+        section_number="1202.2",
+        title="Attic ventilation",
+        body_text=(
+            "Enclosed attics and enclosed rafter spaces formed where ceilings are applied "
+            "directly to the underside of roof rafters shall have cross ventilation for each "
+            "separate space by ventilating openings protected against the entrance of rain or "
+            "snow. Blocking and bridging shall be arranged so as not to interfere with the "
+            "movement of air. A minimum of 1 inch of airspace shall be provided between the "
+            "insulation and the roof sheathing. The net free ventilating area shall not be "
+            "less than 1/150 of the area of the space ventilated, with 50 percent of the "
+            "required ventilating area provided by ventilators located in the upper portion "
+            "of the space to be ventilated at least 3 feet above eave or cornice vents, with "
+            "the balance of the required ventilation provided by eave or cornice vents. As an "
+            "alternative, the net free ventilation area may be reduced to 1/300 of the area "
+            "of the space ventilated where a vapor retarder having a transmission rate not "
+            "exceeding 1 perm is installed on the warm side of the attic insulation."
+        ),
+        effective_date="2023-01-01",
+    ),
+    SeedSection(
+        canonical_id="CEnC-100.0-f",
+        code="CEnC",
+        section_number="100.0(f)",
+        title="Mixed occupancy energy compliance",
+        body_text=(
+            "Where a building contains a combination of residential and nonresidential "
+            "occupancy groups, each occupancy shall independently meet the applicable energy "
+            "code requirements of this part for its occupancy type. A building with a mixed "
+            "occupancy that is predominantly residential shall comply with the requirements "
+            "of the residential subchapter for the residential portions and the nonresidential "
+            "subchapter for the nonresidential portions."
+        ),
+        effective_date="2023-01-01",
+    ),
+    SeedSection(
+        canonical_id="CEnC-150.1-a",
+        code="CEnC",
+        section_number="150.1(a)",
+        title="Prescriptive envelope insulation",
+        body_text=(
+            "Walls, floors, and ceilings shall be insulated to meet or exceed the minimum "
+            "insulation levels specified in Table 150.1-A for the applicable climate zone. "
+            "For Climate Zone 2 (Santa Rosa), exterior walls of wood-frame construction "
+            "shall be insulated to at least R-13 continuous insulation or R-15 cavity "
+            "insulation with 2x4 framing, or R-19 with 2x6 framing."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CEnC-TBL-150.1-A"],
+    ),
+    SeedSection(
+        canonical_id="CEC-210.12-A",
+        code="CEC",
+        section_number="210.12(A)",
+        title="AFCI protection — dwelling units",
+        body_text=(
+            "All 120-volt, single phase, 15- and 20-ampere branch circuits supplying outlets "
+            "or devices installed in dwelling unit kitchens, family rooms, dining rooms, "
+            "living rooms, parlors, libraries, dens, bedrooms, sunrooms, recreation rooms, "
+            "closets, hallways, laundry areas, or similar rooms or areas shall be protected "
+            "by a listed arc-fault circuit interrupter, combination type, installed to "
+            "provide protection of the branch circuit."
+        ),
+        effective_date="2023-01-01",
+    ),
+    SeedSection(
+        canonical_id="CEC-210.8-A",
+        code="CEC",
+        section_number="210.8(A)",
+        title="GFCI protection — dwelling units",
+        body_text=(
+            "All single-phase receptacles installed in the following locations in dwelling "
+            "units shall have ground-fault circuit-interrupter protection for personnel: "
+            "Bathrooms; Garages; Outdoors; Crawl spaces; Basements (unfinished); Boat "
+            "houses; Kitchens (where receptacles are installed to serve the countertop "
+            "surfaces); Sinks; Boathouses."
+        ),
+        effective_date="2023-01-01",
+    ),
+    SeedSection(
+        canonical_id="CEC-210.70-A",
+        code="CEC",
+        section_number="210.70(A)",
+        title="Lighting outlets — dwelling units",
+        body_text=(
+            "At least one wall switch-controlled lighting outlet shall be installed in every "
+            "habitable room, bathroom, hallway, stairway, attached garage, and outdoor "
+            "entrance or exit. At least one receptacle outlet shall be installed in each "
+            "bathroom. For a dwelling unit, at least one wall switch-controlled lighting "
+            "outlet shall be installed in a garage, attic, basement, or similar location "
+            "used for storage or containing equipment requiring service."
+        ),
+        effective_date="2023-01-01",
+    ),
+    SeedSection(
+        canonical_id="CEC-230.70",
+        code="CEC",
+        section_number="230.70",
+        title="Service disconnecting means",
+        body_text=(
+            "A readily accessible means to disconnect all service conductors from the "
+            "service entrance conductors shall be provided. The service disconnecting means "
+            "shall be installed at a readily accessible location inside or outside of a "
+            "building or structure."
+        ),
+        effective_date="2023-01-01",
+    ),
+    SeedSection(
+        canonical_id="CPC-422.1",
+        code="CPC",
+        section_number="422.1",
+        title="Minimum plumbing fixtures",
+        body_text=(
+            "The minimum number of plumbing fixtures shall be as set forth in Table 422.1. "
+            "Fixtures shall be appropriate for the occupancy and the sex of the occupants."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CPC-TBL-422.1"],
+    ),
+    SeedSection(
+        canonical_id="CPC-501.0",
+        code="CPC",
+        section_number="501.0",
+        title="Water heater — general requirements",
+        body_text=(
+            "Water heaters shall be listed and labeled by an approved agency. Water heaters "
+            "shall be installed in accordance with this chapter and the manufacturer's "
+            "installation instructions."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CPC-501.2"],
+    ),
+    SeedSection(
+        canonical_id="CPC-501.2",
+        code="CPC",
+        section_number="501.2",
+        title="Water heater location",
+        body_text=(
+            "Water heaters shall be located in a space with adequate combustion air, or "
+            "shall be power-vented or direct-vent type. Water heaters located in a garage "
+            "shall be installed so that the ignition source is elevated not less than "
+            "18 inches above the floor."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CPC-501.0"],
+    ),
+    SeedSection(
+        canonical_id="CPC-408.3",
+        code="CPC",
+        section_number="408.3",
+        title="Shower controls — thermostatic/pressure-balancing valves",
+        body_text=(
+            "Each shower or combination bath/shower shall be provided with individual "
+            "control valves. Showers and bathtub/shower combinations shall be provided "
+            "with thermostatic mixing valves or pressure-balancing valves. The water "
+            "temperature for bathing facilities shall not exceed 120\u00b0F."
+        ),
+        effective_date="2023-01-01",
+    ),
+    SeedSection(
+        canonical_id="CBC-2308.5.9",
+        code="CBC",
+        section_number="2308.5.9",
+        title="Notching of studs",
+        body_text=(
+            "Notches in the outer edges of studs shall not exceed 25 percent of the width "
+            "of the stud. Notches shall not be cut in the middle third of a stud. Studs "
+            "with notches exceeding these limits or located in the middle third shall be "
+            "doubled or an approved stud of the same type used."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CBC-2308.5.10"],
+    ),
+    SeedSection(
+        canonical_id="CBC-2308.5.10",
+        code="CBC",
+        section_number="2308.5.10",
+        title="Boring of studs",
+        body_text=(
+            "The diameter of bored holes shall not exceed 40 percent of the width of a "
+            "stud. Bored holes shall not be located within 5/8 inch of the stud edge or "
+            "within 2 inches of a notch. Studs with bored holes exceeding these limits "
+            "shall be doubled or an approved stud of the same type used."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CBC-2308.5.9"],
+    ),
+    SeedSection(
+        canonical_id="CBC-2308.4.2",
+        code="CBC",
+        section_number="2308.4.2",
+        title="Header sizes",
+        body_text=(
+            "Headers shall be as specified in Table 2308.4.2.1 for spans of openings in "
+            "exterior walls and interior bearing walls, or shall be designed. Headers for "
+            "openings in nonbearing walls are not required."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CBC-TBL-2308.4.2.1"],
+    ),
+    SeedSection(
+        canonical_id="HSC-13131.5",
+        code="HSC",
+        section_number="13131.5",
+        title="Type V one-hour — residential care facilities, 6 or fewer occupants",
+        body_text=(
+            "Every building or structure used or intended for use as a residential care "
+            "facility with six or fewer occupants shall be at least of Type V construction, "
+            "protected with an automatic fire sprinkler system, or shall be of at least "
+            "Type V one-hour resistive construction."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CBC-310.5.3", "CBC-903.2.8"],
+    ),
+    SeedSection(
+        canonical_id="CFC-907.2.11.2.1",
+        code="CFC",
+        section_number="907.2.11.2.1",
+        title="Fire alarm — Group R-2.1 occupancies",
+        body_text=(
+            "Group R-2.1 occupancies shall be provided with an approved fire alarm system. "
+            "The fire alarm system shall be activated in accordance with Section 907.4."
+        ),
+        effective_date="2023-01-01",
+        cross_references=["CFC-907.4"],
+    ),
+    SeedSection(
+        canonical_id="CFC-903.3.1.2",
+        code="CFC",
+        section_number="903.3.1.2",
+        title="NFPA 13R sprinkler system",
+        body_text=(
+            "Residential occupancies not more than four stories in height shall be permitted "
+            "to use a fire sprinkler system installed in accordance with NFPA 13R."
+        ),
+        effective_date="2023-01-01",
+        referenced_standards=["NFPA 13R"],
+    ),
+    SeedSection(
+        canonical_id="CPC-710.0",
+        code="CPC",
+        section_number="710.0",
+        title="Backflow prevention",
+        body_text=(
+            "Backflow prevention assemblies or air gaps shall be installed on connections "
+            "to the potable water supply serving any equipment that could contaminate the "
+            "water supply through back-siphonage or backflow."
+        ),
+        effective_date="2023-01-01",
+    ),
+    SeedSection(
+        canonical_id="Title24P11-4.303.1",
+        code="Title24P11",
+        section_number="4.303.1",
+        title="Indoor water use — maximum fixture flow rates",
+        body_text=(
+            "Plumbing fixtures and fittings shall comply with the applicable provisions of "
+            "the California Green Building Standards Code, including maximum flow rates for "
+            "toilets (1.28 gpf), urinals (0.5 gpf), showerheads (1.8 gpm), lavatory "
+            "faucets (1.2 gpm), and kitchen faucets (1.8 gpm)."
+        ),
+        effective_date="2023-01-01",
+    ),
+    SeedSection(
+        canonical_id="Title24P11-5.410.1",
+        code="Title24P11",
+        section_number="5.410.1",
+        title="EV charging — electric vehicle supply equipment",
+        body_text=(
+            "New construction of nonresidential occupancies with 10 or more parking spaces "
+            "shall provide electric vehicle supply equipment (EVSE) in accordance with this "
+            "section. New single-family and multifamily residential occupancies shall provide "
+            "electric vehicle capable spaces or EV ready spaces as specified."
+        ),
+        effective_date="2023-01-01",
+    ),
+]
+
+
 ALL_SEED_SECTIONS: list[SeedSection] = (
     CBC_107_SECTIONS + CBC_11B_SECTIONS + CBC_508_716_SECTIONS
     + CBC_CH5_SECTIONS + CBC_CH10_SECTIONS + CENC_150_SECTIONS + CPC_CH4_SECTIONS
-    + CBC_ARCH_ACCESS_SECTIONS
+    + CBC_ARCH_ACCESS_SECTIONS + CBC_MEP_STRUCT_FIRE_SECTIONS
 )
