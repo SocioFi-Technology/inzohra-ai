@@ -64,3 +64,47 @@ class TitleBlockExtraction(BaseModel):
     def to_entity_payload(self) -> dict:  # type: ignore[type-arg]
         """Serialise for the ``entities.payload`` JSONB column."""
         return self.model_dump()
+
+
+class SheetIdentifier(BaseModel):
+    """Structured output of SheetIdentifierParser.
+
+    Derived deterministically from ``TitleBlockExtraction.sheet_identifier_raw``
+    plus the declared / inferred sheet title.
+    """
+
+    VERSION: ClassVar[str] = "1.0.0"
+
+    raw_id: str | None                    # what the title block actually said
+    canonical_id: str | None              # normalised (e.g. "A-1.1")
+    discipline_letter: str | None         # "A", "S", "E", ...
+    sheet_number: str | None              # "1.1"
+    sheet_type: str                        # e.g. "floor_plan" (see taxonomy)
+    sheet_title: str | None
+    confidence: float = Field(ge=0.0, le=1.0)
+    bbox: list[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0, 0.0])
+
+    def to_entity_payload(self) -> dict:  # type: ignore[type-arg]
+        return self.model_dump()
+
+
+class SheetIndexEntry(BaseModel):
+    """A single row extracted from a cover-sheet sheet-index table."""
+
+    declared_id: str
+    declared_title: str | None = None
+    bbox: list[float] = Field(default_factory=lambda: [0.0, 0.0, 0.0, 0.0])
+    confidence: float = Field(ge=0.0, le=1.0, default=0.85)
+
+
+class SheetIndex(BaseModel):
+    """Full declared sheet-index from the cover sheet."""
+
+    VERSION: ClassVar[str] = "1.0.0"
+
+    source_sheet_id: str                   # which sheet this index came from
+    entries: list[SheetIndexEntry]
+    confidence: float = Field(ge=0.0, le=1.0, default=0.8)
+
+    def to_entity_payload(self) -> dict:  # type: ignore[type-arg]
+        return self.model_dump()

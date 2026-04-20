@@ -31,6 +31,14 @@ from app.extractors.title_block import (
     VERSION as TB_VERSION,
     extract_title_block,
 )
+from app.extractors.sheet_identifier import (
+    VERSION as SID_VERSION,
+    extract_sheet_identifier,
+)
+from app.extractors.sheet_index import (
+    VERSION as SIX_VERSION,
+    extract_sheet_index,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -45,7 +53,7 @@ class PipelineConfig:
     model_primary: str = "claude-sonnet-4-5"
     thumb_dpi: int = 144
     extract_dpi: int = 300
-    extractor_version: str = f"title_block:{TB_VERSION}"
+    extractor_version: str = f"title_block:{TB_VERSION}+sid:{SID_VERSION}+six:{SIX_VERSION}"
 
 
 # ---------------------------------------------------------------------------
@@ -357,6 +365,130 @@ def run_plan_set_pipeline(
                     "title_block": tb.model_dump(),
                 }
             )
+
+            # --- SheetIdentifierParser (deterministic) ---
+            sid = extract_sheet_identifier(tb)
+            sid_payload = Jsonb(sid.to_entity_payload())
+            sid_entity_id = str(uuid.uuid4())
+            conn.execute(
+                """INSERT INTO entities
+                     (entity_id, project_id, document_id, sheet_id, type, payload,
+                      bbox, page, extractor_version, confidence, source_track)
+                   VALUES (%s, %s, %s, %s, 'sheet_identifier', %s, %s, %s, %s, %s, 'merged')""",
+                (
+                    sid_entity_id,
+                    project_id,
+                    document_id,
+                    sheet_id,
+                    sid_payload,
+                    sid.bbox if sid.bbox and sid.bbox != [0.0, 0.0, 0.0, 0.0] else entity_bbox,
+                    page_number,
+                    f"sheet_identifier:{SID_VERSION}",
+                    sid.confidence,
+                ),
+            )
+
+            # Update sheets row with the canonical identity + declared scale
+            declared_scale = tb.scale_declared.value if tb.scale_declared else None
+            conn.execute(
+                """UPDATE sheets
+                      SET discipline_letter = %s,
+                          sheet_number      = %s,
+                          canonical_id      = %s,
+                          sheet_type        = %s,
+                          canonical_title   = %s,
+                          declared_scale    = %s,
+                          sheet_identifier_confidence = %s
+                    WHERE sheet_id = %s""",
+                (
+                    sid.discipline_letter,
+                    sid.sheet_number,
+                    sid.canonical_id,
+                    sid.sheet_type,
+                    sid.sheet_title,
+                    declared_scale,
+                    sid.confidence,
+                    sheet_id,
+                ),
+            )
+
+            # --- SheetIndexAgent (cover sheets only) ---
+            six_call_logs: list[dict[str, Any]] = []
+            six = extract_sheet_index(
+                page,
+                source_sheet_id=sheet_id,
+                canonical_id=sid.canonical_id,
+                discipline_letter=sid.discipline_letter,
+                sheet_title=sid.sheet_title,
+                api_key=cfg.anthropic_api_key,
+                model=cfg.model_primary,
+                call_log_rows=six_call_logs,
+            )
+            all_call_logs.extend(six_call_logs)
+
+            if six is not None and six.entries:
+                # One entity per index + per-row sheet_index_entries rows for
+                # easy SQL joins in rules.
+                six_entity_id = str(uuid.uuid4())
+                six_payload = Jsonb(six.to_entity_payload())
+                # Index bbox = union of all entry bboxes
+                idx_bboxes = [
+                    e.bbox for e in six.entries
+                    if e.bbox and e.bbox != [0.0, 0.0, 0.0, 0.0]
+                ]
+                if idx_bboxes:
+                    index_bbox = [
+                        min(b[0] for b in idx_bboxes),
+                        min(b[1] for b in idx_bboxes),
+                        max(b[2] for b in idx_bboxes),
+                        max(b[3] for b in idx_bboxes),
+                    ]
+                else:
+                    index_bbox = [0.0, 0.0, page_w, page_h]
+
+                conn.execute(
+                    """INSERT INTO entities
+                         (entity_id, project_id, document_id, sheet_id, type, payload,
+                          bbox, page, extractor_version, confidence, source_track)
+                       VALUES (%s, %s, %s, %s, 'sheet_index', %s, %s, %s, %s, %s, 'vision')""",
+                    (
+                        six_entity_id,
+                        project_id,
+                        document_id,
+                        sheet_id,
+                        six_payload,
+                        index_bbox,
+                        page_number,
+                        f"sheet_index:{SIX_VERSION}",
+                        six.confidence,
+                    ),
+                )
+
+                for entry in six.entries:
+                    conn.execute(
+                        """INSERT INTO sheet_index_entries
+                             (project_id, document_id, source_sheet_id,
+                              declared_id, declared_title, bbox,
+                              extractor_version, confidence)
+                           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+                        (
+                            project_id,
+                            document_id,
+                            sheet_id,
+                            entry.declared_id,
+                            entry.declared_title,
+                            entry.bbox,
+                            f"sheet_index:{SIX_VERSION}",
+                            entry.confidence,
+                        ),
+                    )
+
+                result.entities.append({
+                    "entity_id": six_entity_id,
+                    "sheet_id": sheet_id,
+                    "page": page_number,
+                    "sheet_index": six.model_dump(),
+                })
 
         # --- persist llm_call_log rows ---
         for log in all_call_logs:

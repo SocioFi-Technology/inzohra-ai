@@ -1,12 +1,13 @@
 /**
  * Sheet viewer — /projects/[id]/sheets/[sheetId]
  *
- * Server component: fetches sheet + entities from DB.
+ * Server component: fetches sheet + entities + findings from DB.
  * Renders client components for interactive parts.
  */
 import { notFound } from "next/navigation";
 import { query, queryOne } from "@/lib/db";
 import { SheetViewerWrapper } from "./SheetViewerWrapper";
+import type { Finding } from "@/components/FindingsPanel";
 
 type Props = {
   params: { id: string; sheetId: string };
@@ -64,12 +65,46 @@ export default async function SheetPage({ params }: Props) {
     [sheetId]
   ) as Record<string, unknown>[];
 
+  // Load all plan_integrity findings for the project (round 1)
+  // We load all findings, not just the current sheet's, so the panel
+  // can filter / show project-wide findings too.
+  const findings = await query<Finding>(
+    `SELECT
+       finding_id,
+       discipline,
+       rule_id,
+       rule_version,
+       severity,
+       requires_licensed_review,
+       sheet_reference,
+       evidence,
+       citations,
+       draft_comment_text,
+       confidence,
+       approval_state,
+       review_round
+     FROM findings
+     WHERE project_id = $1
+       AND discipline = 'plan_integrity'
+     ORDER BY
+       CASE severity
+         WHEN 'revise'          THEN 1
+         WHEN 'provide'         THEN 2
+         WHEN 'clarify'         THEN 3
+         WHEN 'reference_only'  THEN 4
+         ELSE 5
+       END,
+       created_at`,
+    [projectId]
+  );
+
   return (
     <SheetViewerWrapper
       sheet={sheet}
       allSheets={allSheets}
       entities={entities}
       projectId={projectId}
+      findings={findings}
     />
   );
 }
