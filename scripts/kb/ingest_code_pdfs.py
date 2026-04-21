@@ -17,8 +17,8 @@ Usage (from repo root)::
     # Single code only
     uv run scripts/kb/ingest_code_pdfs.py --code CRC
 
-    # Custom codes dir (default: "Building Codes")
-    uv run scripts/kb/ingest_code_pdfs.py --codes-dir "Building Codes"
+    # Custom codes dir (default: "building_codes")
+    uv run scripts/kb/ingest_code_pdfs.py --codes-dir "building_codes"
 
 Requires OPENAI_API_KEY and DATABASE_URL in .env (or environment).
 Idempotent: existing (canonical_id, effective_date) rows are skipped.
@@ -71,17 +71,17 @@ from parsers.referenced_standard import ASCE7Parser, ACI318Parser, NDSParser, AI
 # ---------------------------------------------------------------------------
 
 PDF_REGISTRY: list[tuple[str, object]] = [
-    ("building code vol 1",  CBCParser()),
-    ("building code vol 2",  CBCParser()),
-    ("residential code",     CRCParser()),
+    ("building_code_vol_1",  CBCParser()),
+    ("building_code_vol_2",  CBCParser()),
+    ("residential_code",     CRCParser()),
     ("plumbing",             CPCParser()),
-    ("mechanical",           CMCParser()),
-    ("electrical",           CECParser()),
-    ("fire code",            CFCParser()),
-    ("green building",       CalGreenParser()),
-    ("admin",                CACParser()),
-    ("aci 318",              ACI318Parser()),
-    ("asce 7",               ASCE7Parser()),
+    ("mechanical_code",      CMCParser()),
+    ("electrical_code",      CECParser()),
+    ("fire_code",            CFCParser()),
+    ("green_building",       CalGreenParser()),
+    ("admin_code",           CACParser()),
+    ("aci_318",              ACI318Parser()),
+    ("asce_7",               ASCE7Parser()),
     ("nds-2018-171117",      NDSParser()),
     ("nds-2018-supplement",  NDSParser()),
     ("aisc",                 AISCParser()),
@@ -205,8 +205,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Ingest Building Code PDFs into code_sections KB")
     parser.add_argument(
         "--codes-dir",
-        default="Building Codes",
-        help="Path to Building Codes folder (relative to repo root or absolute)",
+        default="building_codes",
+        help="Path to building_codes folder (relative to repo root or absolute)",
     )
     parser.add_argument(
         "--dry-run",
