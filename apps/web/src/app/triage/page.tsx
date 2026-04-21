@@ -1,5 +1,6 @@
 import { pool } from "@/lib/db";
 import Link from "next/link";
+import { TopNav } from "@/components/TopNav";
 
 async function fetchCounts(): Promise<{
   misses: number;
@@ -98,7 +99,9 @@ export default async function TriagePage() {
   const counts = await fetchCounts();
 
   return (
-    <main className="p-6 max-w-3xl mx-auto">
+    <>
+      <TopNav />
+      <main className="p-6 max-w-3xl mx-auto">
       <div className="flex items-center gap-3 mb-2">
         <Link href="/metrics" className="text-sm text-blue-600 hover:underline">
           &larr; Metrics
@@ -140,5 +143,6 @@ export default async function TriagePage() {
         })}
       </div>
     </main>
+    </>
   );
 }

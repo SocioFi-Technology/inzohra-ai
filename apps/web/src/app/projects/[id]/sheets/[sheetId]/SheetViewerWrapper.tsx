@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { SheetRail } from "@/components/SheetRail";
 import { SheetViewer } from "@/components/SheetViewer";
 import { TitleBlockPanel } from "@/components/TitleBlockPanel";
@@ -84,6 +85,12 @@ export function SheetViewerWrapper({
       <main className="flex-1 overflow-hidden flex flex-col">
         {/* Top bar */}
         <div className="h-10 border-b border-gray-200 flex items-center px-4 gap-3 shrink-0">
+          <Link
+            href={`/projects/${projectId}/sheets`}
+            className="text-xs text-gray-400 hover:text-indigo-600 shrink-0 flex items-center gap-1 mr-2 pr-2 border-r border-gray-200"
+          >
+            ← Gallery
+          </Link>
           <span className="text-sm font-semibold text-gray-700">
             {(titleBlockEntity?.payload as Record<string, unknown>)?.sheet_identifier_raw
               ? (

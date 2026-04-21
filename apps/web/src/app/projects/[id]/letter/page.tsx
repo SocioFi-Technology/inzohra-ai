@@ -3,6 +3,7 @@ import { pool } from "@/lib/db";
 import * as fs from "fs";
 import * as path from "path";
 import { notFound } from "next/navigation";
+import { TopNav } from "@/components/TopNav";
 
 // Severity colors matching the BV palette
 const SEVERITY_COLOR: Record<string, string> = {
@@ -106,18 +107,21 @@ export default async function LetterPage({
 
   if (!render) {
     return (
-      <main className="p-8 max-w-3xl mx-auto">
-        <Link href="/" className="text-sm text-blue-600 hover:underline">
-          &larr; Home
-        </Link>
-        <h1 className="text-2xl font-bold mt-4 mb-2">Comment Letter</h1>
-        <div className="border border-dashed border-gray-300 rounded-lg p-12 text-center text-gray-500">
-          No letter rendered yet. Run:
-          <code className="block mt-2 bg-gray-100 px-3 py-1 rounded text-xs font-mono">
-            pnpm --filter @inzohra/rendering render --project {params.id} --round 1
-          </code>
-        </div>
-      </main>
+      <>
+        <TopNav />
+        <main className="p-8 max-w-3xl mx-auto">
+          <Link href="/" className="text-sm text-blue-600 hover:underline">
+            &larr; Home
+          </Link>
+          <h1 className="text-2xl font-bold mt-4 mb-2">Comment Letter</h1>
+          <div className="border border-dashed border-gray-300 rounded-lg p-12 text-center text-gray-500">
+            No letter rendered yet. Run:
+            <code className="block mt-2 bg-gray-100 px-3 py-1 rounded text-xs font-mono">
+              pnpm --filter @inzohra/rendering render --project {params.id} --round 1
+            </code>
+          </div>
+        </main>
+      </>
     );
   }
 
@@ -154,15 +158,20 @@ export default async function LetterPage({
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <>
+      <TopNav />
+      <main className="min-h-screen bg-gray-50">
       {/* Header bar */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
-        <Link
-          href={`/projects/${params.id}/sheets`}
-          className="text-sm text-blue-600 hover:underline"
-        >
-          &larr; Sheets
-        </Link>
+      <div className="sticky top-12 z-10 bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Link href="/" className="hover:text-indigo-600">Projects</Link>
+          <span>/</span>
+          <Link href={`/projects/${params.id}`} className="hover:text-indigo-600">Project</Link>
+          <span>/</span>
+          <Link href={`/projects/${params.id}/sheets`} className="hover:text-indigo-600">Sheets</Link>
+          <span>/</span>
+          <span className="text-gray-900 font-medium">Letter</span>
+        </div>
         <h1 className="font-bold text-gray-900">
           Comment Letter &mdash; Round {render.review_round}
         </h1>
@@ -322,5 +331,6 @@ export default async function LetterPage({
         </div>
       </div>
     </main>
+    </>
   );
 }

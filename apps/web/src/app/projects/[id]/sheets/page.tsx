@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { query, queryOne } from "@/lib/db";
 import { notFound } from "next/navigation";
+import { TopNav } from "@/components/TopNav";
 
 type SheetCard = {
   sheet_id: string;
@@ -51,10 +52,13 @@ export default async function SheetsGalleryPage({ params }: { params: { id: stri
 
   if (sheets.length === 0) {
     return (
-      <main className="p-8 text-gray-500">
-        <Link href="/" className="text-sm text-blue-600 hover:underline">← Home</Link>
-        <p className="mt-4">No sheets yet — run the ingestion pipeline first.</p>
-      </main>
+      <>
+        <TopNav />
+        <main className="p-8 text-gray-500">
+          <Link href={`/projects/${params.id}`} className="text-sm text-blue-600 hover:underline">← Project</Link>
+          <p className="mt-4">No sheets yet — run the ingestion pipeline first.</p>
+        </main>
+      </>
     );
   }
 
@@ -62,15 +66,23 @@ export default async function SheetsGalleryPage({ params }: { params: { id: stri
   const disciplines = [...new Set(sheets.map((s) => s.discipline_letter).filter(Boolean))] as string[];
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <>
+      <TopNav />
+      <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3 sticky top-0 z-10 flex items-center gap-4">
-        <Link href="/" className="text-sm text-blue-600 hover:underline">← Home</Link>
+      <div className="bg-white border-b border-gray-200 px-6 py-3 sticky top-12 z-10 flex items-center gap-4">
+        <Link href={`/projects/${params.id}`} className="text-sm text-blue-600 hover:underline">← Project</Link>
         <div>
           <span className="font-semibold text-gray-900">{project.address}</span>
           <span className="text-sm text-gray-400 ml-2">Permit {project.permit_number}</span>
         </div>
         <span className="ml-auto text-sm text-gray-400">{sheets.length} sheets</span>
+        <Link
+          href={`/projects/${params.id}/letter`}
+          className="ml-4 px-3 py-1 text-xs font-medium bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        >
+          View Letter →
+        </Link>
       </div>
 
       {/* Discipline filter pills (server-rendered; client-side filtering would need "use client") */}
@@ -145,5 +157,6 @@ export default async function SheetsGalleryPage({ params }: { params: { id: stri
         })}
       </div>
     </main>
+    </>
   );
 }

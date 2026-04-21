@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { pool } from "@/lib/db";
+import { TopNav } from "@/components/TopNav";
 
 type ProjectRow = {
   project_id: string;
@@ -131,27 +132,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Top nav */}
-      <nav className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-6">
-        <span className="font-bold text-gray-900 text-lg">Inzohra-ai</span>
-        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
-          Plan Review System
-        </span>
-        <div className="ml-auto flex items-center gap-4 text-sm">
-          <Link href="/metrics" className="text-gray-600 hover:text-indigo-600">
-            Metrics
-          </Link>
-          <Link href="/triage" className="text-gray-600 hover:text-indigo-600">
-            Triage
-          </Link>
-          <Link
-            href="/admin/packs"
-            className="text-gray-600 hover:text-indigo-600"
-          >
-            Packs
-          </Link>
-        </div>
-      </nav>
+      <TopNav />
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         <h1 className="text-xl font-bold text-gray-900 mb-1">Projects</h1>
@@ -163,13 +144,15 @@ export default async function Home() {
         {projects.length === 0 ? (
           <div className="rounded-xl border-2 border-dashed border-gray-300 p-16 text-center">
             <p className="text-gray-500 text-lg mb-2">No projects yet.</p>
-            <p className="text-sm text-gray-400">
-              Run{" "}
-              <code className="bg-gray-100 px-1.5 py-0.5 rounded font-mono text-xs">
-                uv run scripts/ingest_fixture.py
-              </code>{" "}
-              to ingest the 2008 Dennis Ln fixture.
+            <p className="text-sm text-gray-400 mb-6">
+              Create a project to get started, or ingest the fixture to load sample data.
             </p>
+            <Link
+              href="/projects/new"
+              className="inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
+            >
+              + Create Project
+            </Link>
           </div>
         ) : (
           <div className="space-y-4">
@@ -187,8 +170,8 @@ export default async function Home() {
                   <div className="px-5 py-4 flex items-start gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h2 className="font-semibold text-gray-900">
-                          {p.address}
+                        <h2>
+                          <Link href={`/projects/${p.project_id}`} className="font-semibold text-gray-900 hover:text-indigo-700">{p.address}</Link>
                         </h2>
                         {allDone && (
                           <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
@@ -249,7 +232,7 @@ export default async function Home() {
                   {/* Action links */}
                   <div className="border-t border-gray-100 px-5 py-2.5 flex gap-4 bg-gray-50">
                     <Link
-                      href={`/projects/${p.project_id}/sheets`}
+                      href={`/projects/${p.project_id}`}
                       className="text-xs text-blue-600 hover:underline font-medium"
                     >
                       Reviewer Workspace &rarr;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { pool } from "@/lib/db";
 import { DisciplineBarChart, type DisciplineBarData } from "@/components/DisciplineBarChart";
+import { TopNav } from "@/components/TopNav";
 
 // ---- Colour scale: precision 0→1 mapped to red→yellow→green ----
 function precisionColor(p: number | null): string {
@@ -248,7 +249,9 @@ export default async function MetricsPage({
   }
 
   return (
-    <main className="p-6 max-w-7xl mx-auto">
+    <>
+      <TopNav />
+      <main className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-2">Rule Metrics Dashboard</h1>
       <p className="text-sm text-gray-500 mb-4">
         Precision/recall per rule, computed from AI findings vs authority
@@ -534,5 +537,6 @@ export default async function MetricsPage({
         )}
       </section>
     </main>
+    </>
   );
 }
