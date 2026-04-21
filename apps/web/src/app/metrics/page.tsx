@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { pool } from "@/lib/db";
+import { DisciplineBarChart, type DisciplineBarData } from "@/components/DisciplineBarChart";
 
 // ---- Colour scale: precision 0→1 mapped to red→yellow→green ----
 function precisionColor(p: number | null): string {
@@ -147,6 +148,72 @@ async function fetchShadow(): Promise<ShadowRow[]> {
   }
 }
 
+async function fetchStats(): Promise<{
+  total_findings: number;
+  total_rules: number;
+  total_disciplines: number;
+  avg_precision: number | null;
+  letter_count: number;
+}> {
+  try {
+    const res = await pool.query(`
+      SELECT
+        COUNT(DISTINCT finding_id)::int          AS total_findings,
+        COUNT(DISTINCT rule_id)::int             AS total_rules,
+        COUNT(DISTINCT discipline)::int          AS total_disciplines,
+        ROUND(AVG(precision)::numeric, 3)        AS avg_precision
+      FROM rule_metrics_live
+    `);
+    const letters = await pool
+      .query(`SELECT COUNT(*)::int AS n FROM letter_renders`)
+      .catch(() => ({ rows: [{ n: 0 }] }));
+    return {
+      ...res.rows[0],
+      letter_count: letters.rows[0]?.n ?? 0,
+    };
+  } catch {
+    return { total_findings: 0, total_rules: 0, total_disciplines: 0, avg_precision: null, letter_count: 0 };
+  }
+}
+
+interface BarRow {
+  discipline: string;
+  matched: number | null;
+  false_positives: number | null;
+  missed: number | null;
+  unaligned: number | null;
+}
+
+async function fetchBarData(jurisdiction: string): Promise<DisciplineBarData[]> {
+  try {
+    const whereJurisdiction = jurisdiction ? `AND p.jurisdiction = $1` : "";
+    const args = jurisdiction ? [jurisdiction] : [];
+    const res = await pool.query<BarRow>(`
+      SELECT
+        f.discipline,
+        COUNT(DISTINCT ar.finding_id) FILTER (WHERE ar.bucket = 'matched')        AS matched,
+        COUNT(DISTINCT ar.finding_id) FILTER (WHERE ar.bucket = 'false_positive') AS false_positives,
+        COUNT(DISTINCT ar.comment_id) FILTER (WHERE ar.bucket = 'missed')         AS missed,
+        COUNT(DISTINCT f.finding_id) FILTER (WHERE ar.finding_id IS NULL)         AS unaligned
+      FROM findings f
+      JOIN projects p ON p.project_id = f.project_id
+      LEFT JOIN alignment_records ar ON ar.finding_id = f.finding_id
+      WHERE f.discipline IS NOT NULL ${whereJurisdiction}
+      GROUP BY f.discipline
+      ORDER BY f.discipline
+    `, args);
+    return res.rows.map((r) => ({
+      discipline: (r.discipline as string).replace(/_/g, " "),
+      matched: Number(r.matched ?? 0),
+      false_positives: Number(r.false_positives ?? 0),
+      missed: Number(r.missed ?? 0),
+      unaligned: Number(r.unaligned ?? 0),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 const TRIAGE_QUEUES = [
   "misses",
   "false-positives",
@@ -165,10 +232,12 @@ export default async function MetricsPage({
       ? rawJurisdiction
       : "";
 
-  const [rules, disciplines, shadowRuns] = await Promise.all([
+  const [rules, disciplines, shadowRuns, stats, barData] = await Promise.all([
     fetchRules(jurisdiction),
     fetchDisciplines(jurisdiction),
     fetchShadow(),
+    fetchStats(),
+    fetchBarData(jurisdiction),
   ]);
 
   // Group rules by discipline for heatmap
@@ -189,6 +258,25 @@ export default async function MetricsPage({
         </code>{" "}
         to refresh.
       </p>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        {[
+          { label: "Total Findings", value: stats.total_findings.toLocaleString(), color: "text-indigo-600" },
+          { label: "Rules Covered", value: stats.total_rules.toLocaleString(), color: "text-blue-600" },
+          {
+            label: "Avg Precision",
+            value: stats.avg_precision != null ? (Number(stats.avg_precision) * 100).toFixed(0) + "%" : "—",
+            color: Number(stats.avg_precision ?? 0) >= 0.7 ? "text-green-600" : "text-amber-600",
+          },
+          { label: "Letters Rendered", value: stats.letter_count.toLocaleString(), color: "text-gray-700" },
+        ].map((card) => (
+          <div key={card.label} className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
+            <div className="text-xs text-gray-400 mt-0.5">{card.label}</div>
+          </div>
+        ))}
+      </div>
 
       {/* Jurisdiction filter pills */}
       <div className="flex items-center gap-2 mb-6">
@@ -231,6 +319,14 @@ export default async function MetricsPage({
           </Link>
         ))}
       </div>
+
+      {/* Findings by discipline chart */}
+      {barData.length > 0 && (
+        <section className="mb-8 bg-white border border-gray-200 rounded-lg p-4">
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">Findings by Discipline</h2>
+          <DisciplineBarChart data={barData} />
+        </section>
+      )}
 
       {/* Per-discipline summary */}
       <section className="mb-10">

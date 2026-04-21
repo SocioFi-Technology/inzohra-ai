@@ -1,7 +1,5 @@
-import { Pool } from "pg";
+import { pool as db } from "@/lib/db";
 import Link from "next/link";
-
-const db = new Pool({ connectionString: process.env.DATABASE_URL! });
 
 const EDIT_RATIO_THRESHOLD = 0.25; // 25% of text changed
 

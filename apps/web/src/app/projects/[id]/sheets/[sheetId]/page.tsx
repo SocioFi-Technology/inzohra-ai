@@ -65,38 +65,72 @@ export default async function SheetPage({ params }: Props) {
     [sheetId]
   ) as Record<string, unknown>[];
 
-  // Load all plan_integrity findings for the project (round 1)
-  // We load all findings, not just the current sheet's, so the panel
-  // can filter / show project-wide findings too.
-  const findings = await query<Finding>(
-    `SELECT
-       finding_id,
-       discipline,
-       rule_id,
-       rule_version,
-       severity,
-       requires_licensed_review,
-       sheet_reference,
-       evidence,
-       citations,
-       draft_comment_text,
-       confidence,
-       approval_state,
-       review_round
-     FROM findings
-     WHERE project_id = $1
-       AND discipline = 'plan_integrity'
-     ORDER BY
-       CASE severity
-         WHEN 'revise'          THEN 1
-         WHEN 'provide'         THEN 2
-         WHEN 'clarify'         THEN 3
-         WHEN 'reference_only'  THEN 4
-         ELSE 5
-       END,
-       created_at`,
-    [projectId]
-  );
+  // Load ALL findings for the project (all disciplines), joined with comment_drafts
+  // for polished_text. Wrap in try/catch so that if comment_drafts doesn't exist
+  // yet, we fall back to the query without the JOIN.
+  let findings: Finding[];
+  try {
+    findings = await query<Finding>(
+      `SELECT
+         f.finding_id,
+         f.discipline,
+         f.rule_id,
+         f.rule_version,
+         f.severity,
+         f.requires_licensed_review,
+         f.sheet_reference,
+         f.evidence,
+         f.citations,
+         f.draft_comment_text,
+         f.confidence,
+         COALESCE(f.approval_state, 'pending') AS approval_state,
+         f.review_round,
+         cd.polished_text
+       FROM findings f
+       LEFT JOIN comment_drafts cd
+         ON cd.finding_id = f.finding_id AND cd.project_id = f.project_id
+       WHERE f.project_id = $1
+       ORDER BY
+         CASE f.severity
+           WHEN 'revise'         THEN 1
+           WHEN 'provide'        THEN 2
+           WHEN 'clarify'        THEN 3
+           WHEN 'reference_only' THEN 4
+           ELSE 5
+         END, f.created_at`,
+      [projectId]
+    );
+  } catch {
+    // Fallback: comment_drafts table may not exist yet
+    findings = await query<Finding>(
+      `SELECT
+         f.finding_id,
+         f.discipline,
+         f.rule_id,
+         f.rule_version,
+         f.severity,
+         f.requires_licensed_review,
+         f.sheet_reference,
+         f.evidence,
+         f.citations,
+         f.draft_comment_text,
+         f.confidence,
+         COALESCE(f.approval_state, 'pending') AS approval_state,
+         f.review_round,
+         NULL::text AS polished_text
+       FROM findings f
+       WHERE f.project_id = $1
+       ORDER BY
+         CASE f.severity
+           WHEN 'revise'         THEN 1
+           WHEN 'provide'        THEN 2
+           WHEN 'clarify'        THEN 3
+           WHEN 'reference_only' THEN 4
+           ELSE 5
+         END, f.created_at`,
+      [projectId]
+    );
+  }
 
   return (
     <SheetViewerWrapper

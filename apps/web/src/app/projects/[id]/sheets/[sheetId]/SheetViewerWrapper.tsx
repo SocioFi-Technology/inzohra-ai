@@ -25,7 +25,10 @@ export function SheetViewerWrapper({
   const [highlights, setHighlights] = useState<
     { id: string; bbox: [number, number, number, number]; label: string; color?: string }[]
   >([]);
-  const [rightTab, setRightTab] = useState<"title_block" | "findings">("title_block");
+  // Default to "findings" tab when there are any findings, otherwise "title_block"
+  const [rightTab, setRightTab] = useState<"title_block" | "findings">(
+    findings.length > 0 ? "findings" : "title_block"
+  );
 
   const titleBlockEntity =
     (entities.find((e) => e.type === "title_block") as Record<string, unknown>) ?? null;
@@ -40,6 +43,18 @@ export function SheetViewerWrapper({
 
   function handleHighlightClick(id: string) {
     setActiveFieldId(id);
+  }
+
+  function handleFindingHighlight(
+    findingId: string,
+    bbox: [number, number, number, number] | null
+  ) {
+    if (bbox) {
+      setHighlights([
+        { id: findingId, bbox, label: findingId.slice(0, 8), color: "#3b82f6" },
+      ]);
+      setActiveFieldId(findingId);
+    }
   }
 
   // Shape allSheets for SheetRail
@@ -133,7 +148,7 @@ export function SheetViewerWrapper({
                     : "bg-gray-100 text-gray-400"
                 }`}
               >
-                {findings.length}
+                {sheetFindingCount}/{findings.length}
               </span>
             )}
           </button>
@@ -163,6 +178,8 @@ export function SheetViewerWrapper({
             <FindingsPanel
               findings={findings}
               activeSheetId={sheetId}
+              projectId={projectId}
+              onHighlightRequest={handleFindingHighlight}
             />
           )}
         </div>

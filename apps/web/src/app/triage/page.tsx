@@ -1,22 +1,42 @@
-import { Pool } from "pg";
+import { pool } from "@/lib/db";
 import Link from "next/link";
 
-const db = new Pool({ connectionString: process.env.DATABASE_URL! });
-
-async function fetchCounts(): Promise<{ findings: number; edits: number }> {
-  const [findings, edits] = await Promise.allSettled([
-    db.query("SELECT COUNT(*)::int AS n FROM findings"),
-    db.query(
-      "SELECT COUNT(*)::int AS n FROM reviewer_edits WHERE edit_ratio >= 0.25"
+async function fetchCounts(): Promise<{
+  misses: number;
+  fps: number;
+  edits: number;
+  overrides: number;
+}> {
+  const [misses, fps, edits, overrides] = await Promise.allSettled([
+    pool.query(`
+      SELECT COUNT(*)::int AS n FROM external_review_comments erc
+      WHERE NOT EXISTS (
+        SELECT 1 FROM alignment_records ar
+        WHERE ar.comment_id = erc.external_comment_id AND ar.bucket IN ('matched','partial')
+      )
+    `),
+    pool.query(`
+      SELECT COUNT(*)::int AS n FROM findings f
+      JOIN alignment_records ar ON ar.finding_id = f.finding_id AND ar.bucket = 'false_positive'
+    `),
+    pool.query(
+      `SELECT COUNT(*)::int AS n FROM reviewer_edits WHERE edit_ratio >= 0.25`,
+    ),
+    pool.query(
+      `SELECT COUNT(*)::int AS n FROM measurements WHERE override_value IS NOT NULL`,
     ),
   ]);
+
   return {
-    findings:
-      findings.status === "fulfilled"
-        ? (findings.value.rows[0]?.n ?? 0)
-        : 0,
+    misses:
+      misses.status === "fulfilled" ? (misses.value.rows[0]?.n ?? 0) : 0,
+    fps: fps.status === "fulfilled" ? (fps.value.rows[0]?.n ?? 0) : 0,
     edits:
       edits.status === "fulfilled" ? (edits.value.rows[0]?.n ?? 0) : 0,
+    overrides:
+      overrides.status === "fulfilled"
+        ? (overrides.value.rows[0]?.n ?? 0)
+        : 0,
   };
 }
 
@@ -26,24 +46,28 @@ const QUEUES = [
     label: "Misses",
     desc: "Authority comments the AI did not raise",
     color: "red",
+    countKey: "misses",
   },
   {
     href: "/triage/false-positives",
     label: "False Positives",
     desc: "AI findings the authority did not raise",
     color: "orange",
+    countKey: "fps",
   },
   {
     href: "/triage/edits",
     label: "High-Edit Findings",
-    desc: "Drafter output with large reviewer edits \u2014 few-shot sources",
+    desc: "Drafter output with large reviewer edits — few-shot material",
     color: "purple",
+    countKey: "edits",
   },
   {
     href: "/triage/overrides",
     label: "Measurement Overrides",
     desc: "Manual measurement corrections grouped by type + PDF quality",
     color: "gray",
+    countKey: "overrides",
   },
 ] as const;
 
@@ -71,8 +95,7 @@ const COLOR_MAP = {
 } as const;
 
 export default async function TriagePage() {
-  // counts fetched but not currently displayed on cards — available for future use
-  await fetchCounts();
+  const counts = await fetchCounts();
 
   return (
     <main className="p-6 max-w-3xl mx-auto">
@@ -92,14 +115,24 @@ export default async function TriagePage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {QUEUES.map((q) => {
           const c = COLOR_MAP[q.color];
+          const count = counts[q.countKey as keyof typeof counts];
           return (
             <Link
               key={q.href}
               href={q.href}
               className={`block p-5 rounded-xl border-2 ${c.border} ${c.bg} hover:shadow-sm transition-shadow`}
             >
-              <div className={`text-base font-semibold ${c.text} mb-1`}>
-                {q.label}
+              <div className="flex items-start justify-between">
+                <div className={`text-base font-semibold ${c.text} mb-1`}>
+                  {q.label}
+                </div>
+                {count > 0 && (
+                  <span
+                    className={`text-sm font-bold px-2 py-0.5 rounded-full ${c.bg} ${c.text} border ${c.border}`}
+                  >
+                    {count}
+                  </span>
+                )}
               </div>
               <div className="text-sm text-gray-600">{q.desc}</div>
             </Link>

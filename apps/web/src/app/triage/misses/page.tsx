@@ -1,7 +1,6 @@
-import { Pool } from "pg";
+import { pool } from "@/lib/db";
 import Link from "next/link";
-
-const db = new Pool({ connectionString: process.env.DATABASE_URL! });
+import { MissTriageActions } from "@/components/MissTriageActions";
 
 interface MissedComment {
   comment_id: string;
@@ -16,7 +15,8 @@ interface MissedComment {
 // A proper version would use embedding similarity to existing rules.
 function suggestRule(text: string): string {
   const t = text.toLowerCase();
-  if (t.includes("door") && (t.includes("fire") || t.includes("rated"))) return "FIRE-FIRE-DOOR-002";
+  if (t.includes("door") && (t.includes("fire") || t.includes("rated")))
+    return "FIRE-FIRE-DOOR-002";
   if (t.includes("window") && t.includes("egress")) return "AR-EGRESS-WIN-002";
   if (t.includes("accessible") || t.includes("11b")) return "AC-NEW-001";
   if (t.includes("sprinkler") || t.includes("nfpa")) return "FIRE-SPRINKLER-002";
@@ -32,19 +32,19 @@ function suggestRule(text: string): string {
 async function fetchMissed(): Promise<MissedComment[]> {
   // Try to use alignment_records if available
   try {
-    const res = await db.query<{
+    const res = await pool.query<{
       comment_id: string;
       comment_number: number;
       sheet_ref: string | null;
       comment_text: string;
       discipline: string | null;
     }>(`
-      SELECT erc.comment_id, erc.comment_number, erc.sheet_ref,
+      SELECT erc.external_comment_id AS comment_id, erc.comment_number, erc.sheet_ref,
              erc.comment_text, erc.discipline
       FROM external_review_comments erc
       WHERE NOT EXISTS (
         SELECT 1 FROM alignment_records ar
-        WHERE ar.comment_id = erc.comment_id AND ar.bucket IN ('matched','partial')
+        WHERE ar.comment_id = erc.external_comment_id AND ar.bucket IN ('matched','partial')
       )
       ORDER BY erc.comment_number
     `);
@@ -55,14 +55,14 @@ async function fetchMissed(): Promise<MissedComment[]> {
   } catch {
     // alignment_records table doesn't exist yet — show all external comments
     try {
-      const res = await db.query<{
+      const res = await pool.query<{
         comment_id: string;
         comment_number: number;
         sheet_ref: string | null;
         comment_text: string;
         discipline: string | null;
       }>(`
-        SELECT comment_id, comment_number, sheet_ref, comment_text, discipline
+        SELECT external_comment_id AS comment_id, comment_number, sheet_ref, comment_text, discipline
         FROM external_review_comments
         ORDER BY comment_number
       `);
@@ -132,14 +132,11 @@ export default async function MissesPage() {
                     </div>
                   )}
                 </div>
-                <div className="flex flex-col gap-1.5 flex-shrink-0">
-                  <span className="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 cursor-default text-center">
-                    Add rule
-                  </span>
-                  <span className="px-2 py-1 text-xs rounded border border-gray-200 text-gray-600 cursor-default text-center">
-                    Skill gotcha
-                  </span>
-                </div>
+                <MissTriageActions
+                  commentId={c.comment_id}
+                  commentText={c.comment_text}
+                  discipline={c.discipline}
+                />
               </div>
             </div>
           ))}

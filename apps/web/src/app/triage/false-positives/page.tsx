@@ -1,7 +1,6 @@
-import { Pool } from "pg";
+import { pool } from "@/lib/db";
 import Link from "next/link";
-
-const db = new Pool({ connectionString: process.env.DATABASE_URL! });
+import { FpTriageActions } from "@/components/FpTriageActions";
 
 interface FalsePositiveFinding {
   finding_id: string;
@@ -15,7 +14,7 @@ interface FalsePositiveFinding {
 
 async function fetchFalsePositives(): Promise<FalsePositiveFinding[]> {
   try {
-    const res = await db.query<FalsePositiveFinding>(`
+    const res = await pool.query<FalsePositiveFinding>(`
       SELECT f.finding_id, f.rule_id, f.discipline, f.severity,
              f.sheet_reference->>'sheet_id' AS sheet_id,
              f.draft_comment_text,
@@ -29,7 +28,7 @@ async function fetchFalsePositives(): Promise<FalsePositiveFinding[]> {
   } catch {
     // No alignment yet — show all findings sorted by low confidence
     try {
-      const res = await db.query<FalsePositiveFinding>(`
+      const res = await pool.query<FalsePositiveFinding>(`
         SELECT finding_id, rule_id, discipline, severity,
                sheet_reference->>'sheet_id' AS sheet_id,
                draft_comment_text, confidence
@@ -46,13 +45,30 @@ async function fetchFalsePositives(): Promise<FalsePositiveFinding[]> {
 }
 
 const ACCEPTED_GENERAL_RULES = new Set([
-  "PI-DATE-001", "PI-TITLE-001", "PI-PERMIT-001", "PI-NORTH-001", "PI-SCALE-001",
-  "STR-SHEAR-CALLOUT-001", "STR-HOLDOWN-001", "STR-FASTENER-001", "STR-LOAD-PATH-001",
-  "PLMB-BACKFLOW-001", "PLMB-WH-ELEVATION-001", "MECH-DUCT-INSUL-001",
-  "ELEC-GFCI-001", "ELEC-AFCI-001", "ELEC-ACCESSIBLE-CTRL-001",
-  "CALG-WATER-FIXTURES-001", "CALG-RECYCLE-001", "CALG-EV-READY-001",
-  "CALG-INDOOR-AIR-001", "CALG-MANDATORY-NOTE-001",
-  "EN-CLIMATE-ZONE-001", "EN-HERS-DECL-001", "EN-PRESCRIPTIVE-001", "FIRE-CO-ALARM-001",
+  "PI-DATE-001",
+  "PI-TITLE-001",
+  "PI-PERMIT-001",
+  "PI-NORTH-001",
+  "PI-SCALE-001",
+  "STR-SHEAR-CALLOUT-001",
+  "STR-HOLDOWN-001",
+  "STR-FASTENER-001",
+  "STR-LOAD-PATH-001",
+  "PLMB-BACKFLOW-001",
+  "PLMB-WH-ELEVATION-001",
+  "MECH-DUCT-INSUL-001",
+  "ELEC-GFCI-001",
+  "ELEC-AFCI-001",
+  "ELEC-ACCESSIBLE-CTRL-001",
+  "CALG-WATER-FIXTURES-001",
+  "CALG-RECYCLE-001",
+  "CALG-EV-READY-001",
+  "CALG-INDOOR-AIR-001",
+  "CALG-MANDATORY-NOTE-001",
+  "EN-CLIMATE-ZONE-001",
+  "EN-HERS-DECL-001",
+  "EN-PRESCRIPTIVE-001",
+  "FIRE-CO-ALARM-001",
 ]);
 
 export default async function FalsePositivesPage() {
@@ -111,17 +127,7 @@ export default async function FalsePositivesPage() {
                     {f.draft_comment_text}
                   </p>
                 </div>
-                <div className="flex flex-col gap-1 flex-shrink-0 text-xs">
-                  <span className="px-2 py-1 rounded border border-orange-300 text-orange-700 cursor-default">
-                    Tighten threshold
-                  </span>
-                  <span className="px-2 py-1 rounded border border-orange-300 text-orange-700 cursor-default">
-                    Add exception
-                  </span>
-                  <span className="px-2 py-1 rounded border border-red-300 text-red-700 cursor-default">
-                    Deprecate rule
-                  </span>
-                </div>
+                <FpTriageActions findingId={f.finding_id} />
               </div>
             </div>
           ))}
