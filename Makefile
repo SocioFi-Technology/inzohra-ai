@@ -1,6 +1,11 @@
 # Inzohra-ai — top-level task runner
 # Usage: make <target>
 
+# Load .env so DATABASE_URL and other vars are available to all targets.
+# The - prefix silently ignores a missing .env (safe in CI where vars come from environment).
+-include .env
+export
+
 .PHONY: help dev dev-down migrate reset-db seed-kb seed-packs ingest-codes \
         ingest-fixture review arch-review mep-review measure drafter \
         compare letter typecheck lint test
