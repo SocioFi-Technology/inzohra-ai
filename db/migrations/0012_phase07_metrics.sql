@@ -67,7 +67,9 @@ WITH NO DATA;
 CREATE UNIQUE INDEX IF NOT EXISTS rule_metrics_rule_id_idx ON rule_metrics(rule_id, discipline);
 
 -- Simpler per-rule metrics view (non-materialized) for immediate use before data exists
-CREATE OR REPLACE VIEW rule_metrics_live AS
+-- Drop first — CREATE OR REPLACE cannot remove columns from an existing view definition.
+DROP VIEW IF EXISTS rule_metrics_live;
+CREATE VIEW rule_metrics_live AS
 SELECT
     f.rule_id,
     f.discipline,
