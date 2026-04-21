@@ -12,7 +12,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_USER: inzohra
           POSTGRES_PASSWORD: inzohra_dev
@@ -46,15 +46,10 @@ jobs:
 
       - name: Apply DB migrations
         run: |
-          python3 -c "
-          import psycopg, os, glob
-          conn = psycopg.connect(os.environ['DATABASE_URL'])
-          for f in sorted(glob.glob('db/migrations/*.sql')):
-              print(f'Applying {f}')
-              conn.execute(open(f).read())
-          conn.commit()
-          conn.close()
-          "
+          for f in $(ls db/migrations/*.sql | sort); do
+            echo "Applying $f"
+            psql "$DATABASE_URL" -f "$f"
+          done
 
       - name: Fixture regression — phase 07
         run: pnpm --filter @inzohra/web run fixture -- 07
