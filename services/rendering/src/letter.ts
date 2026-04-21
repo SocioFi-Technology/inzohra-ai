@@ -363,26 +363,169 @@ export function buildJsonBundle(
   };
 
   // ---------------------------------------------------------------------------
-  // Deduplicate: within the same (rule_id, sheet_id) group, drop findings whose
-  // normalised display_text is identical to one already seen.  This collapses
-  // per-entity duplicates produced when the review engine runs the same rule on
-  // every window/door measurement independently but the drafter generates
-  // identical prose for each (e.g. 25 identical AR-WIN-NCO-001 findings on A-1.2).
-  // The first occurrence (earliest created_at) is kept; the rest are suppressed.
+  // Cross-entity grouping & merging.
+  //
+  // When the review engine fires one finding per entity (door, window, room) the
+  // same rule_id can produce N near-identical findings on the same sheet.  BV
+  // writes ONE comment per rule-on-sheet, listing all failing entity tags.
+  //
+  // Algorithm:
+  //   1. Sub-group by (rule_id, sheet_id).
+  //   2. Single-instance sub-groups → pass through unchanged.
+  //   3. Multi-instance sub-groups:
+  //      a. Try to extract an entity type + tag from each finding's polished_text
+  //         (e.g. "Door 2", "Window W14").
+  //      b. If extraction succeeds for ≥ 2 findings → merge into one representative
+  //         finding whose polished_text reads:
+  //           "Sheet <id>: N doors (Door 2, Door 5 … and N more) noted. <rep text>"
+  //         The buildDisplayText function downstream replaces the UUID prefix with
+  //         the canonical sheet label (A-5.0 etc.).
+  //      c. If extraction fails → fall back to collapsing identical texts only.
   // ---------------------------------------------------------------------------
-  const deduplicateGroup = (group: FindingRow[]): FindingRow[] => {
-    const seen = new Set<string>();
-    return group.filter((f) => {
-      // Dedup key: rule_id + sheet_id + first 200 chars of normalised text
-      const text = (f.polished_text ?? f.draft_comment_text ?? "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .slice(0, 200);
-      const key = `${f.rule_id ?? ""}|${f.sheet_reference?.sheet_id ?? ""}|${text}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+
+  /** Pluralise a BV entity-type noun. */
+  const pluraliseEntity = (entityType: string, count: number): string => {
+    if (count === 1) return entityType;
+    const lower = entityType.toLowerCase();
+    const plurals: Record<string, string> = {
+      door: "doors", window: "windows", room: "rooms",
+      fixture: "fixtures", stair: "stairs", corridor: "corridors",
+      ramp: "ramps", aisle: "aisles", unit: "units",
+    };
+    return plurals[lower] ?? `${lower}s`;
+  };
+
+  /**
+   * Extract the entity type and tag from a polished_text.
+   *
+   * Two-pass approach:
+   *   1. Strict: entity type + explicit tag at the very start of the body.
+   *      E.g. "Door 2 shows…"  →  { entityType: "Door", tag: "2", strict: true }
+   *   2. Broad: entity noun found anywhere in the first 120 chars, no tag extracted.
+   *      E.g. "The door shown measures…"  →  { entityType: "door", tag: null, strict: false }
+   */
+  const ENTITY_NOUNS = [
+    "door", "window", "room", "fixture",
+    "stair", "corridor", "ramp", "aisle", "unit",
+  ] as const;
+
+  const extractEntityTag = (
+    text: string,
+  ): { entityType: string; tag: string | null; strict: boolean } | null => {
+    // Strip the "Sheet <uuid>:p<N>: " prefix if present.
+    const stripped = text.replace(/^Sheet\s+[a-f0-9-]+:p\d+:\s*/i, "").trim();
+
+    // Pass 1 — strict: entity type + tag at the start of the body.
+    const strictMatch = stripped.match(
+      /^(Door|Window|Room|Fixture|Stair|Corridor|Ramp|Aisle|Unit)\s+(?:tag\s+)?([A-Za-z0-9][A-Za-z0-9\-\.]*)/i,
+    );
+    if (strictMatch) {
+      return { entityType: strictMatch[1], tag: strictMatch[2], strict: true };
+    }
+
+    // Pass 2 — broad: find entity noun anywhere in the first 120 chars.
+    const head = stripped.slice(0, 120).toLowerCase();
+    for (const noun of ENTITY_NOUNS) {
+      if (head.includes(noun)) {
+        return { entityType: noun, tag: null, strict: false };
+      }
+    }
+
+    return null;
+  };
+
+  const MAX_TAGS_IN_LIST = 10;
+
+  const groupAndMergeFindings = (group: FindingRow[]): FindingRow[] => {
+    if (group.length === 0) return [];
+
+    // Sub-group by (rule_id, sheet_id).
+    const subgroups = new Map<string, FindingRow[]>();
+    for (const f of group) {
+      const key = `${f.rule_id ?? "__none__"}||${f.sheet_reference?.sheet_id ?? "__none__"}`;
+      if (!subgroups.has(key)) subgroups.set(key, []);
+      subgroups.get(key)!.push(f);
+    }
+
+    const result: FindingRow[] = [];
+
+    for (const subgroup of subgroups.values()) {
+      // Single finding: pass through unchanged.
+      if (subgroup.length === 1) {
+        result.push(subgroup[0]);
+        continue;
+      }
+
+      // For every finding try entity extraction (strict + broad).
+      const strictTags: string[] = [];
+      let inferredEntityType = "";
+      for (const f of subgroup) {
+        const rawText = f.polished_text ?? f.draft_comment_text ?? "";
+        const extracted = extractEntityTag(rawText);
+        if (extracted) {
+          if (!inferredEntityType) inferredEntityType = extracted.entityType;
+          if (extracted.strict && extracted.tag !== null) {
+            strictTags.push(extracted.tag);
+          }
+        }
+      }
+
+      // Pick the representative: highest confidence, then earliest created_at.
+      // created_at may be a Date object or a string depending on pg parse settings.
+      const representative = [...subgroup].sort(
+        (a, b) =>
+          b.confidence - a.confidence ||
+          String(a.created_at).localeCompare(String(b.created_at)),
+      )[0];
+
+      const repRaw =
+        representative.polished_text ?? representative.draft_comment_text ?? "";
+
+      // Preserve the "Sheet <uuid>:p<N>: " prefix so buildDisplayText can
+      // replace the UUID with the canonical sheet label later.
+      const prefixMatch = repRaw.match(/^(Sheet\s+[a-f0-9-]+:p\d+:\s*)/i);
+      const sheetPrefix = prefixMatch ? prefixMatch[1] : "";
+      const bodyText = sheetPrefix
+        ? repRaw.slice(sheetPrefix.length).trim()
+        : repRaw.trim();
+
+      const count = subgroup.length;
+
+      let countPhrase: string;
+      if (inferredEntityType) {
+        // We know the entity type. Include strict tags in the list when ≥ 2 present.
+        const noun = pluraliseEntity(inferredEntityType, count);
+        if (strictTags.length >= 2) {
+          const tagList =
+            strictTags.length <= MAX_TAGS_IN_LIST
+              ? strictTags.join(", ")
+              : `${strictTags.slice(0, MAX_TAGS_IN_LIST).join(", ")} and ${strictTags.length - MAX_TAGS_IN_LIST} more`;
+          countPhrase = `${count} ${noun} (${tagList})`;
+        } else if (strictTags.length === 1) {
+          // One strict tag; rest were "the door shown" style.
+          const rest = count - 1;
+          countPhrase = `${count} ${noun} (${strictTags[0]} and ${rest} more)`;
+        } else {
+          // No strict tags — only broad entity detection.
+          countPhrase = `${count} ${noun}`;
+        }
+      } else {
+        // No entity type detectable — just use a count prefix.
+        countPhrase = `${count} instances`;
+      }
+
+      // Final merged text:
+      //   "Sheet A-5.0: 5 doors (Door 2 and 4 more) noted. The door shown …"
+      //   "Sheet A-5.0: 23 doors (Door 2, Door 5, … and 13 more) noted. Door 2 shows …"
+      const mergedPolished = `${sheetPrefix}${countPhrase} noted. ${bodyText}`;
+
+      result.push({
+        ...representative,
+        polished_text: mergedPolished,
+      });
+    }
+
+    return result;
   };
 
   // ---------------------------------------------------------------------------
@@ -393,7 +536,7 @@ export function buildJsonBundle(
 
   for (const discipline of DISCIPLINE_ORDER) {
     const raw = findings.filter((f) => f.discipline === discipline);
-    const deduped = deduplicateGroup(raw);
+    const deduped = groupAndMergeFindings(raw);
     for (const f of deduped) {
       commentNumber += 1;
       const typography = styleMap.get(f.finding_id) ?? "normal";
@@ -410,7 +553,7 @@ export function buildJsonBundle(
   const unorderedRaw = findings.filter(
     (f) => !(DISCIPLINE_ORDER as readonly string[]).includes(f.discipline),
   );
-  const unordered = deduplicateGroup(unorderedRaw);
+  const unordered = groupAndMergeFindings(unorderedRaw);
   for (const f of unordered) {
     commentNumber += 1;
     const typography = styleMap.get(f.finding_id) ?? "normal";
@@ -421,6 +564,85 @@ export function buildJsonBundle(
       typography,
     });
   }
+
+  // ---------------------------------------------------------------------------
+  // Cross-sheet collapse (post-processing, applied after sheet labels are resolved).
+  //
+  // When the same rule fires on N > 1 sheets and all findings share an identical
+  // body text (first 150 chars normalised), merge them into one comment that
+  // lists all affected sheet labels.  This collapses plan-integrity findings like
+  // "PI-DATE-001" which fires on every title block with the same boilerplate text.
+  //
+  // Findings with varying body text (e.g. AC-DOOR-WIDTH-001 where each sheet
+  // shows a different door count / measurement) are deliberately NOT collapsed.
+  // ---------------------------------------------------------------------------
+  const crossSheetCollapse = (
+    inputFindings: LetterBundle["findings"],
+  ): LetterBundle["findings"] => {
+    // Build per-rule groups (preserving canonical order).
+    const byRule = new Map<string, LetterBundle["findings"]>();
+    for (const f of inputFindings) {
+      const k = f.rule_id ?? "__none__";
+      if (!byRule.has(k)) byRule.set(k, []);
+      byRule.get(k)!.push(f);
+    }
+
+    // Determine which rule groups should be collapsed.
+    // Key: first finding_id of the group → the merged output finding.
+    const mergedByFirstId = new Map<string, LetterBundle["findings"][number]>();
+    const suppressedIds = new Set<string>();
+
+    for (const group of byRule.values()) {
+      if (group.length <= 1) continue; // nothing to collapse
+
+      // Extract "body" text = display_text with leading "Sheet <label>: " stripped.
+      const bodies = group.map((f) =>
+        f.display_text.replace(/^Sheet [^:]+:\s*/i, "").trim(),
+      );
+      const normFirst = bodies[0].replace(/\s+/g, " ").slice(0, 150);
+      const allSame = bodies.every(
+        (b) => b.replace(/\s+/g, " ").slice(0, 150) === normFirst,
+      );
+
+      if (!allSame) continue; // bodies differ → keep separate findings
+
+      // Collect resolved sheet labels from each display_text.
+      const sheetLabels = group
+        .map((f) => {
+          const m = f.display_text.match(/^Sheet ([^:]+):/i);
+          return m ? m[1].trim() : null;
+        })
+        .filter((l): l is string => l !== null && l !== "");
+
+      const rep = group[0]; // first in canonical order is representative
+
+      let newDisplayText: string;
+      if (sheetLabels.length >= 2) {
+        newDisplayText = `Sheets ${sheetLabels.join(", ")}: ${bodies[0]}`;
+      } else {
+        newDisplayText = rep.display_text; // only one sheet label resolved
+      }
+
+      mergedByFirstId.set(rep.finding_id, { ...rep, display_text: newDisplayText });
+      // Mark the rest (2nd onward) as suppressed.
+      for (const f of group.slice(1)) {
+        suppressedIds.add(f.finding_id);
+      }
+    }
+
+    // Rebuild the list, replacing first instances and dropping suppressed ones.
+    const rebuilt: LetterBundle["findings"] = [];
+    for (const f of inputFindings) {
+      if (suppressedIds.has(f.finding_id)) continue; // drop
+      const merged = mergedByFirstId.get(f.finding_id);
+      rebuilt.push(merged ?? f);
+    }
+
+    // Renumber 1..N.
+    return rebuilt.map((f, i) => ({ ...f, comment_number: i + 1 }));
+  };
+
+  const finalFindings = crossSheetCollapse(orderedFindings);
 
   return {
     project_id: project.project_id,
@@ -444,7 +666,7 @@ export function buildJsonBundle(
       reviewer_name: tmpl.reviewerName,
       title: tmpl.reviewerTitle,
     },
-    findings: orderedFindings,
+    findings: finalFindings,
     round_typography: {
       round_1: "italic",
       round_2: "bold",
