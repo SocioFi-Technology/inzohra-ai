@@ -28,8 +28,15 @@ CREATE TABLE IF NOT EXISTS shadow_runs (
 );
 
 -- rule_metrics existed as a plain TABLE in earlier schema versions; drop it so
--- we can replace it with a materialized view.
-DROP TABLE IF EXISTS rule_metrics;
+-- we can replace it with a materialized view. Handle both cases idempotently:
+-- a plain table (fresh DB) or an already-created materialized view (re-run).
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'rule_metrics') THEN
+    DROP MATERIALIZED VIEW rule_metrics;
+  ELSIF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'rule_metrics' AND schemaname = 'public') THEN
+    DROP TABLE rule_metrics;
+  END IF;
+END $$;
 
 -- Per-rule precision/recall metrics (refreshed nightly via REFRESH MATERIALIZED VIEW)
 CREATE MATERIALIZED VIEW IF NOT EXISTS rule_metrics AS
