@@ -38,8 +38,8 @@ seed-kb: ## Seed code KB from hand-written SeedSections
 seed-packs: ## Seed jurisdictional amendment packs
 	uv run scripts/kb/seed_packs.py
 
-ingest-codes: ## Parse real Building Code PDFs → code_sections (uses Building Codes/ folder)
-	uv run scripts/kb/ingest_code_pdfs.py --codes-dir "Building Codes"
+ingest-codes: ## Parse real Building Code PDFs → code_sections (uses building_codes/ folder)
+	uv run scripts/kb/ingest_code_pdfs.py --codes-dir "building_codes"
 
 # ── Plan ingestion ────────────────────────────────────────────────────────────
 
