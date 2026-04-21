@@ -22,7 +22,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-_repo_root = Path(__file__).resolve().parent.parent
+_repo_root = Path(__file__).resolve().parent.parent.parent
 load_dotenv(_repo_root / ".env", override=True)
 
 # NOTE: No sys.path surgery needed — the uv workspace installs both
@@ -47,7 +47,7 @@ from app.pipelines.review_letter import ReviewLetterConfig, run_review_letter_pi
 # Fixture constants
 # ---------------------------------------------------------------------------
 
-FIXTURE_DIR = _repo_root / "fixtures" / "2008-dennis-ln"
+FIXTURE_DIR = _repo_root / "data" / "fixtures" / "2008-dennis-ln"
 CANONICAL_ADDRESS = "2008 Dennis Ln, Santa Rosa, CA"
 PERMIT_NUMBER = "B25-2734"
 JURISDICTION = "santa_rosa"

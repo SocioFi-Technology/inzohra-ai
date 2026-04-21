@@ -135,7 +135,7 @@ export default async function LetterPage({
       process.cwd(),
       "..",
       "..",
-      "services",
+      "apps",
       "rendering",
       "inzohra-output",
       path.basename(render.json_path),

@@ -19,7 +19,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-_repo_root = Path(__file__).resolve().parent.parent
+_repo_root = Path(__file__).resolve().parent.parent.parent
 load_dotenv(_repo_root / ".env", override=True)
 
 # NOTE: No sys.path surgery — uv workspace resolves app.* as a namespace package

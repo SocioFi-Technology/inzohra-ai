@@ -34,7 +34,7 @@ from dotenv import load_dotenv
 # Path setup
 # ---------------------------------------------------------------------------
 
-_REPO_ROOT = Path(__file__).resolve().parent.parent
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 _PACKS_DIR = _REPO_ROOT / "packs"
 
 load_dotenv(_REPO_ROOT / ".env", override=False)

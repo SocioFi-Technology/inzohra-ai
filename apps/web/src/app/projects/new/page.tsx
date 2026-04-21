@@ -231,7 +231,7 @@ export default function NewProjectPage() {
           <strong>Note:</strong> Creating a project here registers it in the
           database. To ingest plan drawings, run the ingestion pipeline:{" "}
           <code className="bg-blue-100 px-1.5 py-0.5 rounded font-mono text-xs">
-            uv run scripts/ingest_fixture.py
+            uv run scripts/ingest/ingest_fixture.py
           </code>
         </div>
       </div>

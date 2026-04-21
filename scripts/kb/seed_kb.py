@@ -27,7 +27,7 @@ from pathlib import Path
 # Resolve paths and load .env before importing any service code
 # ---------------------------------------------------------------------------
 
-_repo_root = Path(__file__).resolve().parent.parent
+_repo_root = Path(__file__).resolve().parent.parent.parent
 
 from dotenv import load_dotenv  # noqa: E402
 

@@ -11,7 +11,7 @@ import os
 import sys
 from pathlib import Path
 
-_repo_root = Path(__file__).resolve().parent.parent
+_repo_root = Path(__file__).resolve().parent.parent.parent
 from dotenv import load_dotenv
 load_dotenv(_repo_root / ".env", override=True)
 

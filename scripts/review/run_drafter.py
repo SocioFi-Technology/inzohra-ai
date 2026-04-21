@@ -24,7 +24,7 @@ from pathlib import Path
 # Bootstrap: repo root on sys.path so services/review is importable.
 # ---------------------------------------------------------------------------
 
-_REPO_ROOT: Path = Path(__file__).resolve().parent.parent
+_REPO_ROOT: Path = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_REPO_ROOT / "services" / "review"))
 
 from dotenv import load_dotenv  # noqa: E402 — must come after sys.path insert

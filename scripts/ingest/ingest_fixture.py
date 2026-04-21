@@ -22,7 +22,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 from dotenv import load_dotenv
 
-_repo_root = Path(__file__).resolve().parent.parent
+_repo_root = Path(__file__).resolve().parent.parent.parent
 load_dotenv(_repo_root / ".env", override=True)  # override any shell env stubs
 
 # ---------------------------------------------------------------------------
@@ -43,7 +43,7 @@ from app.pipelines.plan_set import (
 # ---------------------------------------------------------------------------
 # Fixture constants
 # ---------------------------------------------------------------------------
-FIXTURE_PDF = _repo_root / "fixtures" / "2008-dennis-ln" / "plan-set.pdf"
+FIXTURE_PDF = _repo_root / "data" / "fixtures" / "2008-dennis-ln" / "plan-set.pdf"
 CANONICAL_ADDRESS = "2008 Dennis Ln, Santa Rosa, CA"
 PERMIT_NUMBER = "B25-2734"
 JURISDICTION = "santa_rosa"

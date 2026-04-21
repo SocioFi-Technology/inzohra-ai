@@ -21,7 +21,7 @@ import uuid
 from collections import Counter
 from pathlib import Path
 
-_REPO_ROOT = Path(__file__).resolve().parent.parent
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_REPO_ROOT / "services" / "review"))
 
 from dotenv import load_dotenv
@@ -32,7 +32,7 @@ import psycopg.rows
 
 from app.comparison.alignment import align, AlignmentRecord
 
-_FIXTURE_PDF = _REPO_ROOT / "fixtures" / "2008-dennis-ln" / "expected-bv-letter.pdf"
+_FIXTURE_PDF = _REPO_ROOT / "data" / "fixtures" / "2008-dennis-ln" / "expected-bv-letter.pdf"
 
 
 # ---------------------------------------------------------------------------
