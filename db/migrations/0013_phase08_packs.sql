@@ -89,11 +89,14 @@ GROUP BY f.rule_id, f.discipline, p.jurisdiction;
 -- Drop the old index first (depends on the view)
 DROP INDEX IF EXISTS rule_metrics_rule_id_idx;
 
--- Safety: drop as plain TABLE in case migration 0012 did not run yet
-DROP TABLE IF EXISTS rule_metrics;
-
--- Drop and recreate the materialized view with jurisdiction
-DROP MATERIALIZED VIEW IF EXISTS rule_metrics;
+-- Drop rule_metrics regardless of whether it's a plain TABLE or MATERIALIZED VIEW
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'rule_metrics') THEN
+    DROP MATERIALIZED VIEW rule_metrics;
+  ELSIF EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'rule_metrics' AND schemaname = 'public') THEN
+    DROP TABLE rule_metrics;
+  END IF;
+END $$;
 
 CREATE MATERIALIZED VIEW rule_metrics AS
 SELECT
