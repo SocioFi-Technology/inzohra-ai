@@ -19,15 +19,29 @@ __pycache__/
 .vscode/
 .idea/
 
-fixtures/*/
-!fixtures/*/README.md
-!fixtures/phase-08/
-!fixtures/phase-08/*.json
-!fixtures/phase-09/
-!fixtures/phase-09/*.json
-# Guard large files dropped directly at fixtures/ root
-fixtures/*.pdf
-fixtures/*.docx
-fixtures/*.json
+# ---------------------------------------------------------------------------
+# Data — fixtures (moved from root fixtures/ to data/fixtures/)
+# ---------------------------------------------------------------------------
+data/fixtures/*/
+!data/fixtures/*/README.md
+!data/fixtures/phase-08/
+!data/fixtures/phase-08/*.json
+!data/fixtures/phase-09/
+!data/fixtures/phase-09/*.json
+# Guard large files dropped directly at data/fixtures/ root
+data/fixtures/*.pdf
+data/fixtures/*.docx
+data/fixtures/*.json
+
+# ---------------------------------------------------------------------------
+# Building Code PDFs (large binary files — not tracked in git)
+# ---------------------------------------------------------------------------
+Building Codes/
+codes_pdf/
+
+# ---------------------------------------------------------------------------
+# Rendering service output (generated artefacts)
+# ---------------------------------------------------------------------------
+apps/rendering/inzohra-output/
 
 coverage/
