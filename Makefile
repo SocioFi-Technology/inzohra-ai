@@ -1,9 +1,9 @@
 # Inzohra-ai — top-level task runner
 # Usage: make <target>
 
-.PHONY: help dev dev-down seed-kb seed-packs ingest-codes ingest-fixture \
-        review arch-review mep-review measure drafter compare letter \
-        typecheck lint test
+.PHONY: help dev dev-down migrate reset-db seed-kb seed-packs ingest-codes \
+        ingest-fixture review arch-review mep-review measure drafter \
+        compare letter typecheck lint test
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -16,6 +16,14 @@ dev: ## Start local Docker stack (Postgres + Redis + MinIO)
 
 dev-down: ## Stop and remove local Docker stack
 	docker compose down
+
+migrate: ## Apply all SQL migrations (requires DATABASE_URL in .env)
+	bash db/scripts/migrate.sh
+
+reset-db: ## Drop and recreate the DB, then re-apply migrations (destructive!)
+	docker exec inzohra-postgres psql -U inzohra -c "DROP DATABASE IF EXISTS inzohra;"
+	docker exec inzohra-postgres psql -U inzohra -c "CREATE DATABASE inzohra;"
+	bash db/scripts/migrate.sh
 
 # ── Knowledge base ────────────────────────────────────────────────────────────
 
